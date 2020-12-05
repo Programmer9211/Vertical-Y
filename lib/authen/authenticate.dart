@@ -1,0 +1,152 @@
+import 'package:flutter/material.dart';
+import 'package:not_whatsapp/services/auth.dart';
+import 'package:not_whatsapp/shared/const.dart';
+import 'package:not_whatsapp/shared/logo.dart';
+
+class Authenticate extends StatefulWidget {
+  final Function toggleView;
+  Authenticate({this.toggleView});
+  @override
+  _AuthenticateState createState() => _AuthenticateState();
+}
+
+class _AuthenticateState extends State<Authenticate> {
+  final AuthService _authService = AuthService();
+  final _formKey = GlobalKey<FormState>();
+  bool loading = false;
+
+  String email1 = "";
+  String password1 = "";
+  String error1 = "";
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+          elevation: 0.0,
+          title: Text(
+            "Login",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(0, 245, 206, 1.0),
+            ),
+          ),
+          actions: [
+            FlatButton.icon(
+              onPressed: () {
+                widget.toggleView();
+              },
+              icon: Icon(Icons.arrow_forward_ios, color: Colors.white),
+              label: Text(
+                "New",
+                style: TextStyle(
+                    color: Color.fromRGBO(0, 245, 206, 1.0),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800),
+              ),
+            )
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            color: Color.fromRGBO(101, 97, 125, 1.0),
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(height: 50),
+                Logo(),
+                SizedBox(height: 60),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
+                        child: TextFormField(
+                          decoration:
+                              textfieldDecor.copyWith(labelText: "Email"),
+                          validator: (value) =>
+                              value.isEmpty ? "Enter a valid Email" : null,
+                          onChanged: (val) {
+                            setState(() {
+                              email1 = val;
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
+                        child: TextFormField(
+                          obscureText: true,
+                          decoration:
+                              textfieldDecor.copyWith(labelText: "Password"),
+                          validator: (value) => value.length < 6
+                              ? "Enter a Password 6 char long"
+                              : null,
+                          onChanged: (val) {
+                            setState(() {
+                              password1 = val;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 30),
+                MaterialButton(
+                  height: 50,
+                  minWidth: 200,
+                  onPressed: () async {
+                    if (_formKey.currentState.validate()) {
+                      setState(() {
+                        loading = true;
+                      });
+                      dynamic result =
+                          _authService.signInWithemailPassword(email1, password1);
+                      if (result == null) {
+                        setState(() {
+                          error1 = "Failed";
+                          loading = false;
+                        });
+                      }
+                    }
+                  },
+                  color: Color.fromRGBO(0, 245, 206, 1.0),
+                  child: Text(
+                    "Sign-Up",
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Color.fromRGBO(91, 87, 113, 1.0),
+                    ),
+                  ),
+                  shape: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(20),
+                          topLeft: Radius.circular(20))),
+                ),
+                SizedBox(height: 50),
+                InkWell(
+                  onTap: () {},
+                  child: Text(
+                    "Forgot Password ??",
+                    style: TextStyle(
+                        color: Color.fromRGBO(0, 245, 206, 1.0), fontSize: 16),
+                  ),
+                ),
+                SizedBox(height: 50),
+                Text(
+                  "Created By 3Divyanshu \u{1f47b}",
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ));
+  }
+}
