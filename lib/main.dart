@@ -1,29 +1,27 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:not_whatsapp/home/wapper.dart';
-import 'package:not_whatsapp/models/userData.dart';
-import 'package:not_whatsapp/services/auth.dart';
-import 'package:provider/provider.dart';
 
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
+  await Firebase.initializeApp();
 
-void main() {
-  runApp(Myapp());
+  SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown])
+      .then((value) => runApp(MyApp()));
 }
 
-
-class Myapp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<User>.value(
-      value: AuthService().user,
-    child:
-    MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
       home: Wrapper(),
-    ),
     );
   }
 }

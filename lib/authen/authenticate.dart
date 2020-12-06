@@ -11,8 +11,8 @@ class Authenticate extends StatefulWidget {
 }
 
 class _AuthenticateState extends State<Authenticate> {
-  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
+  final _scaffoldkey = GlobalKey<ScaffoldState>();
   bool loading = false;
 
   String email1 = "";
@@ -20,6 +20,9 @@ class _AuthenticateState extends State<Authenticate> {
   String error1 = "";
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
@@ -51,8 +54,8 @@ class _AuthenticateState extends State<Authenticate> {
         body: SingleChildScrollView(
           child: Container(
             color: Color.fromRGBO(101, 97, 125, 1.0),
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+            height: height,
+            width: width,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -106,14 +109,8 @@ class _AuthenticateState extends State<Authenticate> {
                       setState(() {
                         loading = true;
                       });
-                      dynamic result =
-                          _authService.signInWithemailPassword(email1, password1);
-                      if (result == null) {
-                        setState(() {
-                          error1 = "Failed";
-                          loading = false;
-                        });
-                      }
+
+                      signIn(email1, password1, context, _scaffoldkey);
                     }
                   },
                   color: Color.fromRGBO(0, 245, 206, 1.0),
