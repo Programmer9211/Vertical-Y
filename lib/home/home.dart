@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/home/Screens/profile.dart';
 import 'package:not_whatsapp/services/auth.dart';
+import 'package:not_whatsapp/shared/const.dart';
+import 'package:not_whatsapp/shared/postCard.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -9,7 +11,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int colorint = 300;
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +92,19 @@ class _FeedsState extends State<Feeds> {
         context: context,
         builder: (context) => Dialog(
               child: Container(
+                height: MediaQuery.of(context).size.height*0.5,
                 child: Column(
                   children: [
-                    TextField(
-                      controller: title,
+                    Padding(
+                      padding: const EdgeInsets.only(left:8.0, right: 8.0),
+                      child: TextField(
+                        controller: title,
+                        decoration: textPostField.copyWith(hintText: "Give a nice Catchy Title 👌"),
+                      ),
                     ),
                     TextField(
                       controller: des,
+                      decoration: textPostField
                     ),
                     FlatButton(
                         onPressed: () {
@@ -167,133 +174,7 @@ class _FeedsState extends State<Feeds> {
 }
 
 // ignore: must_be_immutable
-class Post extends StatelessWidget {
-  DocumentSnapshot ds;
 
-  Post({this.ds});
-
-  DocumentSnapshot del;
-  int count = 0;
-
-  void agree() {}
-
-  void disagree() {}
-
-  Widget options(String title, IconData iconData, Function onTap, double height,
-      double width, Color color) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: height,
-        width: width,
-        color: color,
-        child: Row(
-          children: [
-            SizedBox(width: width / 12),
-            Icon(
-              iconData,
-              color: Colors.white,
-            ),
-            Text(
-              " $title",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
-
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15),
-        child: Material(
-          elevation: 5,
-          color: Color.fromRGBO(214, 255, 249, 1),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            child: Column(
-              children: [
-                Container(
-                  height: height / 12,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: width / 40,
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Color.fromRGBO(214, 255, 249, 1),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Icon(
-                            Icons.account_circle_outlined,
-                            size: 35,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: width / 15,
-                      ),
-                      Text(
-                        "${ds['name']} \n${ds['time']}  ${ds['date']}",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(
-                  thickness: 2,
-                ),
-                SizedBox(
-                  height: height / 70,
-                ),
-                Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      ds['title'],
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                    )),
-                SizedBox(
-                  height: height / 70,
-                ),
-                Divider(
-                  thickness: 2,
-                ),
-                Container(
-                  height: height / 12,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: width / 20,
-                      ),
-                      options(" 0 Agree", Icons.thumb_up, () {}, height / 16,
-                          width / 2.6, Colors.green),
-                      SizedBox(
-                        width: width / 13.5,
-                      ),
-                      options(" 0 Disagree", Icons.thumb_down, disagree,
-                          height / 16, width / 2.6, Colors.red),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: height / 70,
-                ),
-              ],
-            ),
-          ),
-        ));
-  }
-}
 
 class Message extends StatefulWidget {
   @override
@@ -319,56 +200,3 @@ class _NotificationsState extends State<Notifications> {
   }
 }
 
-class Profile extends StatefulWidget {
-  @override
-  _ProfileState createState() => _ProfileState();
-}
-
-class _ProfileState extends State<Profile> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                border: Border.symmetric(),
-                // borderRadius: BorderRadius.only(bottomLeft: Radius.circular(150), bottomRight: Radius.circular(150),)
-              ),
-              alignment: Alignment.center,
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-                      child: CircleAvatar(
-                          radius: 75,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(75),
-                            child: Image.asset("assets/1.jpg"),
-                          )),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Text(
-              "Divyanshu S. Rajput",
-              style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black),
-            ),
-            Divider(
-              thickness: 2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
