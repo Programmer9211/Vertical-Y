@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class Profile extends StatefulWidget {
   @override
   _ProfileState createState() => _ProfileState();
@@ -40,7 +41,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               Text(
-                "Divyanshu S. Rajput",
+               "No name" ,
                 style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w500,
@@ -101,15 +102,17 @@ class _ProfileState extends State<Profile> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(onPressed: (){}, 
-      backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-      label:Text(
-                "Say Hi 👋",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromRGBO(101, 97, 125, 1.0)),
-              ),),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {},
+        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
+        label: Text(
+          "Say Hi 👋",
+          style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color.fromRGBO(101, 97, 125, 1.0)),
+        ),
+      ),
     );
   }
 }

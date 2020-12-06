@@ -73,7 +73,7 @@ class _PostState extends State<Post> {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            "Flutter Developer",
+                            "${widget.ds['des']}",
                             style: TextStyle(
                                 fontSize: 14, color: Colors.grey[700]),
                           ),

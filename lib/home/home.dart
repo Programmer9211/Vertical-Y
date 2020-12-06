@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/home/Screens/postCreation.dart';
 import 'package:not_whatsapp/home/Screens/profile.dart';
 import 'package:not_whatsapp/services/auth.dart';
 import 'package:not_whatsapp/shared/const.dart';
@@ -11,7 +12,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -28,11 +28,22 @@ class _HomeState extends State<Home> {
             ),
           ),
           actions: [
+            FlatButton.icon(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> CreatePost()));
+                },
+                icon: Icon(Icons.add_to_queue, color: Color.fromRGBO(101, 97, 125, 1.0),),
+                label: Text(
+                  "New Post",
+                  style: TextStyle(
+                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                  ),
+                )),
             IconButton(
-                icon: Icon(Icons.settings),
+                icon: Icon(Icons.menu, size: 20, color: Color.fromRGBO(101, 97, 125, 1.0),),
                 onPressed: () {
                   signout(context);
-                })
+                }),
           ],
           bottom: TabBar(
             indicatorColor: Color.fromRGBO(101, 97, 125, 1.0),
@@ -92,20 +103,18 @@ class _FeedsState extends State<Feeds> {
         context: context,
         builder: (context) => Dialog(
               child: Container(
-                height: MediaQuery.of(context).size.height*0.5,
+                height: MediaQuery.of(context).size.height * 0.5,
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left:8.0, right: 8.0),
+                      padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                       child: TextField(
                         controller: title,
-                        decoration: textPostField.copyWith(hintText: "Give a nice Catchy Title 👌"),
+                        decoration: textPostField.copyWith(
+                            hintText: "Give a nice Catchy Title 👌"),
                       ),
                     ),
-                    TextField(
-                      controller: des,
-                      decoration: textPostField
-                    ),
+                    TextField(controller: des, decoration: textPostField),
                     FlatButton(
                         onPressed: () {
                           FirebaseFirestore.instance.collection('news').add({
@@ -157,9 +166,7 @@ class _FeedsState extends State<Feeds> {
                       );
                 }
               } else {
-                return Container(
-                    //
-                    );
+                return Container();
               }
             }),
         floatingActionButton: FloatingActionButton(
@@ -174,7 +181,6 @@ class _FeedsState extends State<Feeds> {
 }
 
 // ignore: must_be_immutable
-
 
 class Message extends StatefulWidget {
   @override
@@ -199,4 +205,3 @@ class _NotificationsState extends State<Notifications> {
     return Scaffold();
   }
 }
-
