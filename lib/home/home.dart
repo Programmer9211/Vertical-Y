@@ -1,7 +1,12 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/home/Screens/postCreation.dart';
+import 'package:not_whatsapp/home/Screens/profile.dart';
 import 'package:not_whatsapp/services/auth.dart';
+import 'package:not_whatsapp/shared/const.dart';
+import 'package:not_whatsapp/shared/postCard.dart';
 
+import '../shared/const.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -9,10 +14,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final AuthService _auth = AuthService();
-
-  int colorint = 300;
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -32,7 +33,7 @@ class _HomeState extends State<Home> {
             IconButton(
                 icon: Icon(Icons.settings),
                 onPressed: () {
-                  _auth.signOut();
+                  signout(context);
                 })
           ],
           bottom: TabBar(
@@ -75,13 +76,108 @@ class Feeds extends StatefulWidget {
 }
 
 class _FeedsState extends State<Feeds> {
+  final TextEditingController title = TextEditingController();
+  final TextEditingController des = TextEditingController();
+  CollectionReference newsRefs = FirebaseFirestore.instance.collection('news');
+
+  @override
+  void dispose() {
+    super.dispose();
+    title.dispose();
+    des.dispose();
+  }
+
+  // static final TimeOfDay timenow = TimeOfDay.now();
+  // static final DateTime dateTime = DateTime.now();
+
+  // void _showDialog() {
+  //   showDialog(
+  //       context: context,
+  //       builder: (context) => Dialog(
+  //             child: Container(
+  //               height: MediaQuery.of(context).size.height * 0.5,
+  //               child: Column(
+  //                 children: [
+  //                   Padding(
+  //                     padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+  //                     child: TextField(
+  //                       controller: title,
+  //                       decoration: textPostField.copyWith(
+  //                           hintText: "Give a nice Catchy Title 👌"),
+  //                     ),
+  //                   ),
+  //                   TextField(controller: des, decoration: textPostField),
+  //                   FlatButton(
+  //                       onPressed: () {
+  //                         newsRefs.add({
+  //                           'title': "${title.text}",
+  //                           'des': "${des.text}",
+  //                           'name': "${auth.currentUser.displayName}",
+  //                           'order': dateTime,
+  //                           'time': timenow.format(context),
+  //                           'date': dateTime.toString().split(' ')[0],
+  //                           'uid': auth.currentUser.uid
+  //                         });
+
+  //                         title.clear();
+  //                         des.clear();
+  //                         Navigator.pop(context);
+  //                       },
+  //                       child: Text("Post"))
+  //                 ],
+  //               ),
+  //             ),
+  //           ));
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(213, 210, 221, 0.1),
-    );
+        backgroundColor: Color.fromRGBO(213, 210, 221, 0.1),
+        body: StreamBuilder<QuerySnapshot>(
+            stream: newsRefs.orderBy('order', descending: true).snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data.docs.length != 0 &&
+                    snapshot.data.docs != null) {
+                  return ListView.builder(
+                      itemCount: snapshot.data.docs.length,
+                      itemBuilder: (context, index) {
+                        dspostid = snapshot.data.docs[
+                            index]; // used to get indexes of all documents present in collections
+                        print(snapshot.data.docs[index].id);
+                        return Post(
+                            ds: dspostid,
+                            newsrefs: newsRefs,
+                            uid: snapshot.data.docs[index]['uid']);
+                      });
+                } else {
+                  return Container(
+                      // yaha kuch bhi dikha diyo jb koi bhi news na ho tab
+                      );
+                }
+              } else {
+                return Container(
+                    //
+                    );
+              }
+            }),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(
+            Icons.add,
+            color: Color.fromRGBO(101, 97, 125, 1.0),
+          ),
+          backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => CreatePost(newsRefs)));
+          },
+        ));
   }
 }
+
+// ignore: must_be_immutable
 
 class Message extends StatefulWidget {
   @override
@@ -104,59 +200,5 @@ class _NotificationsState extends State<Notifications> {
   @override
   Widget build(BuildContext context) {
     return Scaffold();
-  }
-}
-
-class Profile extends StatefulWidget {
-  @override
-  _ProfileState createState() => _ProfileState();
-}
-
-class _ProfileState extends State<Profile> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                border: Border.symmetric(),
-                // borderRadius: BorderRadius.only(bottomLeft: Radius.circular(150), bottomRight: Radius.circular(150),)
-              ),
-              alignment: Alignment.center,
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-                      child: CircleAvatar(
-                          radius: 75,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(75),
-                            child: Image.asset("assets/1.jpg"),
-                          )),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Text(
-              "Divyanhsu S. Rajput",
-              style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black),
-            ),
-            Divider(
-              thickness: 2,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

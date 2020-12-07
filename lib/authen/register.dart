@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:not_whatsapp/services/auth.dart';
-import 'package:not_whatsapp/shared/buttons.dart';
 import 'package:not_whatsapp/shared/const.dart';
 import 'package:not_whatsapp/shared/logo.dart';
 
@@ -12,7 +11,7 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  final AuthService _authService = AuthService();
+  TextEditingController _name = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   String email = "";
@@ -59,9 +58,10 @@ class _SignUpState extends State<SignUp> {
               Padding(
                 padding: const EdgeInsets.only(left: 25.0, right: 25.0),
                 child: TextFormField(
+                    controller: _name,
                     decoration: textfieldDecor.copyWith(
-                  labelText: "Full Name",
-                )),
+                      labelText: "Full Name",
+                    )),
               ),
               Form(
                 key: _formKey,
@@ -118,14 +118,7 @@ class _SignUpState extends State<SignUp> {
                     setState(() {
                       loading = true;
                     });
-                    dynamic result = await _authService
-                        .registerWithemailpassword(email, password);
-                    if (result == null) {
-                      setState(() {
-                        loading = false;
-                        error = "Error Not Valid Email";
-                      });
-                    }
+                    signUp(email, password, _name.text, context);
                   }
                 },
                 color: Color.fromRGBO(0, 245, 206, 1.0),
