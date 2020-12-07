@@ -6,6 +6,11 @@ import 'package:not_whatsapp/services/auth.dart';
 import 'package:not_whatsapp/shared/const.dart';
 import 'package:not_whatsapp/shared/postCard.dart';
 
+
+import '../shared/const.dart';
+
+
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -43,7 +48,11 @@ class _HomeState extends State<Home> {
                 icon: Icon(Icons.menu, size: 20, color: Color.fromRGBO(101, 97, 125, 1.0),),
                 onPressed: () {
                   signout(context);
+
+                })
+
                 }),
+
           ],
           bottom: TabBar(
             indicatorColor: Color.fromRGBO(101, 97, 125, 1.0),
@@ -88,6 +97,9 @@ class _FeedsState extends State<Feeds> {
   final TextEditingController title = TextEditingController();
   final TextEditingController des = TextEditingController();
 
+  CollectionReference newsRefs = FirebaseFirestore.instance.collection('news');
+
+
   @override
   void dispose() {
     super.dispose();
@@ -95,6 +107,49 @@ class _FeedsState extends State<Feeds> {
     des.dispose();
   }
 
+
+  // static final TimeOfDay timenow = TimeOfDay.now();
+  // static final DateTime dateTime = DateTime.now();
+
+  // void _showDialog() {
+  //   showDialog(
+  //       context: context,
+  //       builder: (context) => Dialog(
+  //             child: Container(
+  //               height: MediaQuery.of(context).size.height * 0.5,
+  //               child: Column(
+  //                 children: [
+  //                   Padding(
+  //                     padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+  //                     child: TextField(
+  //                       controller: title,
+  //                       decoration: textPostField.copyWith(
+  //                           hintText: "Give a nice Catchy Title 👌"),
+  //                     ),
+  //                   ),
+  //                   TextField(controller: des, decoration: textPostField),
+  //                   FlatButton(
+  //                       onPressed: () {
+  //                         newsRefs.add({
+  //                           'title': "${title.text}",
+  //                           'des': "${des.text}",
+  //                           'name': "${auth.currentUser.displayName}",
+  //                           'order': dateTime,
+  //                           'time': timenow.format(context),
+  //                           'date': dateTime.toString().split(' ')[0],
+  //                           'uid': auth.currentUser.uid
+  //                         });
+
+  //                         title.clear();
+  //                         des.clear();
+  //                         Navigator.pop(context);
+  //                       },
+  //                       child: Text("Post"))
+  //                 ],
+  //               ),
+  //             ),
+  //           ));
+  // }
   static final TimeOfDay timenow = TimeOfDay.now();
   static final DateTime dateTime = DateTime.now();
 
@@ -142,10 +197,14 @@ class _FeedsState extends State<Feeds> {
     return Scaffold(
         backgroundColor: Color.fromRGBO(213, 210, 221, 0.1),
         body: StreamBuilder<QuerySnapshot>(
+
+            stream: newsRefs.orderBy('order', descending: true).snapshots(),
+
             stream: FirebaseFirestore.instance
                 .collection('news')
                 .orderBy('order', descending: true)
                 .snapshots(),
+
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasData) {
@@ -154,11 +213,21 @@ class _FeedsState extends State<Feeds> {
                   return ListView.builder(
                       itemCount: snapshot.data.docs.length,
                       itemBuilder: (context, index) {
+
+                        dspostid = snapshot.data.docs[
+                            index]; // used to get indexes of all documents present in collections
+                        print(snapshot.data.docs[index].id);
+                        return Post(
+                            ds: dspostid,
+                            newsrefs: newsRefs,
+                            uid: snapshot.data.docs[index]['uid']);
+
                         DocumentSnapshot ds = snapshot.data.docs[
                             index]; // used to get indexes of all documents present in collections
                         return Post(
                           ds: ds,
                         );
+
                       });
                 } else {
                   return Container(
@@ -166,7 +235,13 @@ class _FeedsState extends State<Feeds> {
                       );
                 }
               } else {
+
+                return Container(
+                    //
+                    );
+
                 return Container();
+
               }
             }),
         floatingActionButton: FloatingActionButton(
@@ -175,6 +250,12 @@ class _FeedsState extends State<Feeds> {
             color: Color.fromRGBO(101, 97, 125, 1.0),
           ),
           backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
+
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => CreatePost(newsRefs)));
+          },
+
           onPressed: _showDialog,
         ));
   }
