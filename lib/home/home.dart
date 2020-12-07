@@ -79,6 +79,9 @@ class _HomeState extends State<Home> {
   }
 }
 
+
+
+
 class Feeds extends StatefulWidget {
   @override
   _FeedsState createState() => _FeedsState();
@@ -154,8 +157,8 @@ class _FeedsState extends State<Feeds> {
                   return ListView.builder(
                       itemCount: snapshot.data.docs.length,
                       itemBuilder: (context, index) {
-                        DocumentSnapshot ds = snapshot.data.docs[
-                            index]; // used to get indexes of all documents present in collections
+                        DocumentSnapshot ds = snapshot.data.docs[index];
+                        // used to get indexes of all documents present in collections
                         return Post(
                           ds: ds,
                         );
@@ -180,6 +183,8 @@ class _FeedsState extends State<Feeds> {
   }
 }
 
+
+
 // ignore: must_be_immutable
 
 class Message extends StatefulWidget {
@@ -193,6 +198,9 @@ class _MessageState extends State<Message> {
     return Scaffold();
   }
 }
+
+
+
 
 class Notifications extends StatefulWidget {
   @override
