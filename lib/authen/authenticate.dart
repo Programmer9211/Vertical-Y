@@ -24,6 +24,7 @@ class _AuthenticateState extends State<Authenticate> {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+        key: _scaffoldkey,
         appBar: AppBar(
           backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
           elevation: 0.0,

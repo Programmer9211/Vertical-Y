@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/services/auth.dart';
 
 // ignore: must_be_immutable
 class Profile extends StatefulWidget {
@@ -41,7 +41,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               Text(
-               "No name" ,
+                "${auth.currentUser.displayName}",
                 style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w500,
@@ -51,7 +51,7 @@ class _ProfileState extends State<Profile> {
                 thickness: 2,
               ),
               Text(
-                "I am a Flutter Developer And I am an Optimistic person",
+                "UID :  ${auth.currentUser.uid}",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
