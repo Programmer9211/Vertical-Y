@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/services/auth.dart';
 
 // ignore: must_be_immutable
 class Post extends StatefulWidget {
+  String uid;
   DocumentSnapshot ds;
+  CollectionReference newsrefs;
 
-  Post({this.ds});
+  Post({this.ds, this.newsrefs, this.uid});
 
   @override
   _PostState createState() => _PostState();
@@ -14,17 +17,112 @@ class Post extends StatefulWidget {
 class _PostState extends State<Post> {
   DocumentSnapshot del;
 
-  int count = 0;
+  DocumentReference likerefs;
+  DocumentReference dislikerefs;
+  Map<String, dynamic> data;
+  Map<String, dynamic> dislikedata;
 
-  void agree() {}
+  CollectionReference newsref;
+  DocumentSnapshot ds;
 
-  void disagree() {}
+  @override
+  void initState() {
+    likerefs = FirebaseFirestore.instance
+        .collection('like')
+        .doc(auth.currentUser.uid + ":" + widget.ds.id);
+    dislikerefs = FirebaseFirestore.instance
+        .collection('dislike')
+        .doc(auth.currentUser.uid + ":" + widget.ds.id);
+    super.initState();
+
+    likerefs.get().then((value) => data = value.data());
+    dislikerefs.get().then((value) => dislikedata = value.data());
+  }
+
+  void agree() {
+    likerefs.get().then((value) {
+      if (value.data() != null && value.data().length != 0) {
+        if (value.data().keys.contains(widget.ds.id)) {
+          FirebaseFirestore.instance.runTransaction((transaction) async {
+            DocumentSnapshot postrefrence =
+                await transaction.get(widget.newsrefs.doc(widget.ds.id));
+
+            if (postrefrence.exists) {
+              transaction.update(widget.newsrefs.doc(widget.ds.id),
+                  {'likes': postrefrence.data()['likes'] - 1});
+
+              likerefs.update({widget.ds.id: FieldValue.delete()});
+
+              setState(() {
+                likerefs.get().then((value) => data = value.data());
+              });
+            }
+          });
+        }
+      } else {
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          DocumentSnapshot postrefrence =
+              await transaction.get(widget.newsrefs.doc(widget.ds.id));
+
+          if (postrefrence.exists) {
+            transaction.update(widget.newsrefs.doc(widget.ds.id),
+                {'likes': postrefrence.data()['likes'] + 1});
+          }
+
+          likerefs.set({widget.ds.id: true});
+
+          setState(() {
+            likerefs.get().then((value) => data = value.data());
+          });
+        });
+      }
+    });
+  }
+
+  void disagree() {
+    dislikerefs.get().then((value) {
+      if (value.data() != null && value.data().length != 0) {
+        if (value.data().keys.contains(widget.ds.id)) {
+          FirebaseFirestore.instance.runTransaction((transaction) async {
+            DocumentSnapshot postrefrence =
+                await transaction.get(widget.newsrefs.doc(widget.ds.id));
+
+            if (postrefrence.exists) {
+              transaction.update(widget.newsrefs.doc(widget.ds.id),
+                  {'dislikes': postrefrence.data()['dislikes'] - 1});
+            }
+
+            dislikerefs.update({widget.ds.id: FieldValue.delete()});
+
+            setState(() {
+              dislikerefs.get().then((value) => dislikedata = value.data());
+            });
+          });
+        }
+      } else {
+        FirebaseFirestore.instance.runTransaction((transaction) async {
+          DocumentSnapshot postreference =
+              await transaction.get(widget.newsrefs.doc(widget.ds.id));
+
+          if (postreference.exists) {
+            transaction.update(widget.newsrefs.doc(widget.ds.id),
+                {'dislikes': postreference.data()['dislikes'] + 1});
+          }
+
+          dislikerefs.set({widget.ds.id: true});
+
+          setState(() {
+            dislikerefs.get().then((value) => dislikedata = value.data());
+          });
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
-
     return Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 8),
         child: Material(
@@ -73,7 +171,7 @@ class _PostState extends State<Post> {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            "${widget.ds['des']}",
+                            "About me",
                             style: TextStyle(
                                 fontSize: 14, color: Colors.grey[700]),
                           ),
@@ -107,7 +205,7 @@ class _PostState extends State<Post> {
                 Divider(),
                 Container(
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         child: Row(
@@ -115,7 +213,7 @@ class _PostState extends State<Post> {
                             Column(
                               children: [
                                 Text(
-                                  "000",
+                                  "${widget.ds['likes']}",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       color: Color.fromRGBO(101, 97, 125, 1.0)),
@@ -123,18 +221,22 @@ class _PostState extends State<Post> {
                                 IconButton(
                                   icon: Icon(
                                     Icons.thumb_up,
-                                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                                    color: data != null &&
+                                            data.containsKey(widget.ds.id)
+                                        ? Color.fromRGBO(0, 180, 160, 1.0)
+                                        : Color.fromRGBO(101, 97, 125, 1.0),
                                     size: 30,
                                   ),
-                                  onPressed: () {},
-                                )
+                                  onPressed: agree,
+                                  color: Color.fromRGBO(101, 97, 125, 1.0),
+                                ),
                               ],
                             ),
                             SizedBox(width: 15),
                             Column(
                               children: [
                                 Text(
-                                  "000",
+                                  "${widget.ds['dislikes']}",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       color: Color.fromRGBO(101, 97, 125, 1.0)),
@@ -142,19 +244,48 @@ class _PostState extends State<Post> {
                                 IconButton(
                                   icon: Icon(
                                     Icons.thumb_down,
-                                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                                    color: dislikedata != null &&
+                                            dislikedata
+                                                .containsKey(widget.ds.id)
+                                        ? Color.fromRGBO(0, 180, 160, 1.0)
+                                        : Color.fromRGBO(101, 97, 125, 1.0),
                                     size: 30,
                                   ),
-                                  onPressed: () {},
+                                  onPressed: disagree,
                                 )
                               ],
                             ),
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.menu,size: 30, color: Color.fromRGBO(101, 97, 125, 1.0),),
-                        onPressed: (){},
+                      SizedBox(width: 20),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => Comments(
+                                        ds: widget.ds,
+                                        newsref: widget.newsrefs,
+                                      )));
+                        },
+                        child: Card(
+                          elevation: 1,
+                          child: Container(
+                            height: 50,
+                            width: 190,
+                            color: Colors.white,
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Comment Box",
+                              style: TextStyle(
+                                color: Color.fromRGBO(101, 97, 125, 1.0),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700
+                              ),
+                            ),
+                          ),
+                        ),
                       )
                     ],
                   ),
@@ -166,5 +297,137 @@ class _PostState extends State<Post> {
             ),
           ),
         ));
+  }
+}
+
+// ignore: must_be_immutable
+class Comments extends StatelessWidget {
+  CollectionReference newsref;
+  DocumentSnapshot ds;
+  Comments({this.newsref, this.ds});
+  final TextEditingController title = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(220, 220, 230, 1.0),
+      bottomNavigationBar: Container(
+        color: Color.fromRGBO(0, 245, 206, 1.0),
+        child: Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                      controller: title,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "'Add Comment Here'",
+                      )),
+                ),
+                SizedBox(width: 10),
+                MaterialButton(
+                    elevation: 0.0,
+                    child: Icon(Icons.send,
+                        color: Color.fromRGBO(0, 245, 206, 1.0), size: 30),
+                    onPressed: () {
+                      newsref.doc(ds.id).collection('comment').doc().set({
+                        'title': "${title.text}",
+                        'name': "${auth.currentUser.displayName}",
+                      });
+
+                      title.clear();
+                    },
+                    minWidth: 50,
+                    height: 50,
+                    color: Color.fromRGBO(101, 97, 125, 1.0))
+              ],
+            ),
+          ),
+        ),
+      ),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
+        title: Text(
+          "Comment Box",
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: Color.fromRGBO(101, 97, 125, 1.0)),
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+          stream: newsref.doc(ds.id).collection('comment').snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data.docs.length != null &&
+                  snapshot.data.docs != null) {
+                return ListView.builder(
+                    itemCount: snapshot.data.docs.length,
+                    itemBuilder: (context, index) {
+                      DocumentSnapshot dsc = snapshot.data.docs[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 5, left: 5),
+                        child: Card(
+                          elevation: 0.3,
+                          child: ListTile(
+                            leading: Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: CircleAvatar(
+                                radius: 24,
+                                backgroundColor:
+                                    Color.fromRGBO(101, 97, 125, 1.0),
+                                child: CircleAvatar(
+                                  radius: 22,
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: Image.asset(
+                                        "assets/search.png",
+                                        fit: BoxFit.fill,
+                                      )),
+                                ),
+                              ),
+                            ),
+                            title: Padding(
+                              padding: const EdgeInsets.only(bottom: 5.0),
+                              child: Text(
+                                '${dsc['name']}',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            subtitle: Text(
+                              "${dsc['title']}",
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: 16,
+                              ),
+                            ),
+                            trailing: Text(
+                              "Date",
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                        ),
+                      );
+                    });
+              } else {
+                return ListTile(
+                );
+              }
+            } else {
+              return ListTile(
+              );
+            }
+          }),
+    );
   }
 }
