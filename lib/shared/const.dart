@@ -15,4 +15,14 @@ const textPostField = InputDecoration(
   labelStyle: TextStyle(color: Color.fromRGBO(0, 245, 206, 1.0)),
 );
 
+
 DocumentSnapshot dspostid;
+=======
+const textPostField = InputDecoration(
+  labelStyle: TextStyle(color: Color.fromRGBO(0, 245, 206, 1.0)),
+  
+);
+
+
+
+

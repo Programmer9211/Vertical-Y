@@ -6,11 +6,17 @@ import 'const.dart';
 
 // ignore: must_be_immutable
 class Post extends StatefulWidget {
+
   String uid;
   DocumentSnapshot ds;
   CollectionReference newsrefs;
 
   Post({this.ds, this.newsrefs, this.uid});
+
+  DocumentSnapshot ds;
+
+  Post({this.ds});
+
 
   @override
   _PostState createState() => _PostState();
@@ -18,6 +24,7 @@ class Post extends StatefulWidget {
 
 class _PostState extends State<Post> {
   DocumentSnapshot del;
+
 
   DocumentReference likerefs;
   DocumentReference dislikerefs;
@@ -187,7 +194,13 @@ class _PostState extends State<Post> {
         });
       }
     });
-  }
+
+  int count = 0;
+
+  void agree() {}
+
+  void disagree() {}
+
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +255,11 @@ class _PostState extends State<Post> {
                           ),
                           SizedBox(height: 2),
                           Text(
+
                             "About me",
+
+                            "${widget.ds['des']}",
+
                             style: TextStyle(
                                 fontSize: 14, color: Colors.grey[700]),
                           ),
@@ -284,7 +301,11 @@ class _PostState extends State<Post> {
                             Column(
                               children: [
                                 Text(
+
                                   "${widget.ds['likes']}",
+=======
+                                  "000",
+
                                   style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       color: Color.fromRGBO(101, 97, 125, 1.0)),
@@ -292,6 +313,7 @@ class _PostState extends State<Post> {
                                 IconButton(
                                   icon: Icon(
                                     Icons.thumb_up,
+
                                     color: data != null &&
                                             data.containsKey(widget.ds.id)
                                         ? Colors.blue
@@ -299,6 +321,12 @@ class _PostState extends State<Post> {
                                     size: 30,
                                   ),
                                   onPressed: agree,
+=======
+                                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                                    size: 30,
+                                  ),
+                                  onPressed: () {},
+
                                 )
                               ],
                             ),
@@ -306,7 +334,11 @@ class _PostState extends State<Post> {
                             Column(
                               children: [
                                 Text(
+
                                   "${widget.ds['dislikes']}",
+=======
+                                  "000",
+
                                   style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       color: Color.fromRGBO(101, 97, 125, 1.0)),
@@ -314,6 +346,7 @@ class _PostState extends State<Post> {
                                 IconButton(
                                   icon: Icon(
                                     Icons.thumb_down,
+
                                     color: dislikedata != null &&
                                             dislikedata
                                                 .containsKey(widget.ds.id)
@@ -322,6 +355,12 @@ class _PostState extends State<Post> {
                                     size: 30,
                                   ),
                                   onPressed: disagree,
+=======
+                                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                                    size: 30,
+                                  ),
+                                  onPressed: () {},
+
                                 )
                               ],
                             ),
@@ -329,11 +368,13 @@ class _PostState extends State<Post> {
                         ),
                       ),
                       IconButton(
+
                         icon: Icon(
                           Icons.menu,
                           size: 30,
                           color: Color.fromRGBO(101, 97, 125, 1.0),
                         ),
+
                         onPressed: () {
                           Navigator.push(
                               context,
@@ -343,6 +384,7 @@ class _PostState extends State<Post> {
                                         ds: widget.ds,
                                       )));
                         },
+
                       )
                     ],
                   ),
