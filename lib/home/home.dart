@@ -30,6 +30,22 @@ class _HomeState extends State<Home> {
             ),
           ),
           actions: [
+            FlatButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => CreatePost(
+                              FirebaseFirestore.instance.collection('news'))));
+                },
+                icon: Icon(Icons.local_post_office, color: Color.fromRGBO(101, 97, 125, 1.0),),
+                label: Text(
+                  "New Post",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                  )
+                )),
             IconButton(
                 icon: Icon(
                   Icons.menu,
@@ -92,99 +108,12 @@ class _FeedsState extends State<Feeds> {
     des.dispose();
   }
 
-  // static final TimeOfDay timenow = TimeOfDay.now();
-  // static final DateTime dateTime = DateTime.now();
-
-  // void _showDialog() {
-  //   showDialog(
-  //       context: context,
-  //       builder: (context) => Dialog(
-  //             child: Container(
-  //               height: MediaQuery.of(context).size.height * 0.5,
-  //               child: Column(
-  //                 children: [
-  //                   Padding(
-  //                     padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-  //                     child: TextField(
-  //                       controller: title,
-  //                       decoration: textPostField.copyWith(
-  //                           hintText: "Give a nice Catchy Title 👌"),
-  //                     ),
-  //                   ),
-  //                   TextField(controller: des, decoration: textPostField),
-  //                   FlatButton(
-  //                       onPressed: () {
-  //                         newsRefs.add({
-  //                           'title': "${title.text}",
-  //                           'des': "${des.text}",
-  //                           'name': "${auth.currentUser.displayName}",
-  //                           'order': dateTime,
-  //                           'time': timenow.format(context),
-  //                           'date': dateTime.toString().split(' ')[0],
-  //                           'uid': auth.currentUser.uid
-  //                         });
-
-  //                         title.clear();
-  //                         des.clear();
-  //                         Navigator.pop(context);
-  //                       },
-  //                       child: Text("Post"))
-  //                 ],
-  //               ),
-  //             ),
-  //           ));
-  // }
-  // static final TimeOfDay timenow = TimeOfDay.now();
-  // static final DateTime dateTime = DateTime.now();
-
-  // void _showDialog() {
-  //   showDialog(
-  //       context: context,
-  //       builder: (context) => Dialog(
-  //             child: Container(
-  //               height: MediaQuery.of(context).size.height * 0.5,
-  //               child: Column(
-  //                 children: [
-  //                   Padding(
-  //                     padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-  //                     child: TextField(
-  //                       controller: title,
-  //                       decoration: textPostField.copyWith(
-  //                           hintText: "Give a nice Catchy Title 👌"),
-  //                     ),
-  //                   ),
-  //                   TextField(controller: des, decoration: textPostField),
-  //                   FlatButton(
-  //                       onPressed: () {
-  //                         FirebaseFirestore.instance.collection('news').add({
-  //                           'title': "${title.text}",
-  //                           'des': "${des.text}",
-  //                           'name': "${auth.currentUser.displayName}",
-  //                           'order': dateTime,
-  //                           'time': timenow.format(context),
-  //                           'date': dateTime.toString().split(' ')[0]
-  //                         });
-
-  //                         title.clear();
-  //                         des.clear();
-  //                         Navigator.pop(context);
-  //                       },
-  //                       child: Text("Post"))
-  //                 ],
-  //               ),
-  //             ),
-  //           ));
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Color.fromRGBO(213, 210, 221, 0.1),
         body: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('news')
-                .orderBy('order', descending: true)
-                .snapshots(),
+            stream: newsRefs.orderBy('order', descending: true).snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasData) {
@@ -194,9 +123,9 @@ class _FeedsState extends State<Feeds> {
                       itemCount: snapshot.data.docs.length,
                       itemBuilder: (context, index) {
                         // used to get indexes of all documents present in collections
-                        dspostid = snapshot.data.docs[index];//used to get indexes of all documents present in collections
+                        dspostid = snapshot.data.docs[
+                            index]; //used to get indexes of all documents present in collections
                         print(snapshot.data.docs[index].id);
-                        DocumentSnapshot ds = snapshot.data.docs[index];
                         return Post(
                             ds: dspostid,
                             newsrefs: newsRefs,
@@ -230,18 +159,7 @@ class _FeedsState extends State<Feeds> {
                   ),
                 );
               }
-            }),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(
-            Icons.add,
-            color: Color.fromRGBO(101, 97, 125, 1.0),
-          ),
-          backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => CreatePost(newsRefs)));
-          },
-        ));
+            }),);
   }
 }
 

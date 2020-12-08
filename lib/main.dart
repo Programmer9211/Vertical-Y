@@ -6,8 +6,6 @@ import 'package:not_whatsapp/home/wapper.dart';
 
 
 
-
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
