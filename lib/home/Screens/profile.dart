@@ -150,9 +150,9 @@ class _ProfileState extends State<Profile> {
                                       ),
                                       InfoTile(
                                         icon: Icons.work,
-                                        title: snapshot.data['location'],
+                                        title: snapshot.data['Location'],
                                         onTapped: () {
-                                          onTapped('location');
+                                          onTapped('Location');
                                         },
                                       ),
                                       InfoTile(
