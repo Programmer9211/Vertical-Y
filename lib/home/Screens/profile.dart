@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:not_whatsapp/services/auth.dart';
@@ -151,9 +150,9 @@ class _ProfileState extends State<Profile> {
                                       ),
                                       InfoTile(
                                         icon: Icons.work,
-                                        title: snapshot.data['location'],
+                                        title: snapshot.data['Location'],
                                         onTapped: () {
-                                          onTapped('location');
+                                          onTapped('Location');
                                         },
                                       ),
                                       InfoTile(

@@ -63,10 +63,10 @@ void signUp(String email, String password, String userName,
         .collection('profile')
         .doc(auth.currentUser.uid)
         .set({
-      'bio': "",
-      'education': "",
-      'profession': "",
-      'Location': "",
+      'bio': "Add Bio",
+      'education': "Add Education",
+      'profession': "Add Profession",
+      'Location': "Add Location",
       'name': auth.currentUser.displayName
     });
 
