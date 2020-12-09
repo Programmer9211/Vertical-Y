@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:not_whatsapp/authen/authentication.dart';
@@ -57,6 +58,17 @@ void signUp(String email, String password, String userName,
 
     await user.updateProfile(
         displayName: userName); // user name update ho jayega
+
+    FirebaseFirestore.instance
+        .collection('profile')
+        .doc(auth.currentUser.uid)
+        .set({
+      'bio': "",
+      'education': "",
+      'profession': "",
+      'Location': "",
+      'name': auth.currentUser.displayName
+    });
 
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => Home()));
