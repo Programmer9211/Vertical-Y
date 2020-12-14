@@ -1,4 +1,7 @@
-class User {
+class Users {
   final String uid;
-  User({this.uid});
+  final String photoUrl;
+  Users({this.uid, this.photoUrl});
+
+  static String userName;
 }
