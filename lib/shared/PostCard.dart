@@ -171,7 +171,7 @@ class _PostState extends State<Post> {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            "About me",
+                            "snapshot.data['bio']}",
                             style: TextStyle(
                                 fontSize: 14, color: Colors.grey[700]),
                           ),
@@ -279,10 +279,9 @@ class _PostState extends State<Post> {
                             child: Text(
                               "Comment Box",
                               style: TextStyle(
-                                color: Color.fromRGBO(101, 97, 125, 1.0),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700
-                              ),
+                                  color: Color.fromRGBO(101, 97, 125, 1.0),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700),
                             ),
                           ),
                         ),
@@ -420,12 +419,10 @@ class Comments extends StatelessWidget {
                       );
                     });
               } else {
-                return ListTile(
-                );
+                return ListTile();
               }
             } else {
-              return ListTile(
-              );
+              return ListTile();
             }
           }),
     );
