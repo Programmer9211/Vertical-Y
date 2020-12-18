@@ -19,6 +19,21 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     setValue();
+    getFollowers();
+  }
+
+  void getFollowers() async {
+    await FirebaseFirestore.instance
+        .collection('profile')
+        .doc(auth.currentUser.uid)
+        .collection('followers')
+        .get()
+        .then((value) {
+      for (int i = 0; i <= value.docs.length; i++) {
+        followersUid.add(value.docs[i]['uid']);
+      }
+      print(followersUid);
+    });
   }
 
   void setValue() async {
@@ -314,6 +329,36 @@ class Notifications extends StatefulWidget {
 class _NotificationsState extends State<Notifications> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('profile')
+            .doc(auth.currentUser.uid)
+            .collection('notify')
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.data != null) {
+            return ListView.builder(
+                itemCount: snapshot.data.docs.length,
+                itemBuilder: (context, index) {
+                  DocumentSnapshot ds = snapshot.data.docs[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(ds['image']),
+                    ),
+                    title: Text(ds['title']),
+                    subtitle: Text(ds['sub']),
+                  );
+                });
+          } else {
+            return Center(
+              child: Container(
+                child: Text("No Notifications yet"),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 }
