@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/home/Screens/ChatRoom.dart';
 import 'package:not_whatsapp/home/Screens/postCreation.dart';
 import 'package:not_whatsapp/home/Screens/profile.dart';
 import 'package:not_whatsapp/services/auth.dart';
@@ -14,6 +15,26 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    super.initState();
+    setValue();
+  }
+
+  void setValue() async {
+    print('object');
+    return await FirebaseFirestore.instance
+        .collection('profile')
+        .doc(auth.currentUser.uid)
+        .get()
+        .then((value) {
+      setState(() {
+        profilesnap = value;
+        print(value);
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -115,40 +136,45 @@ class _FeedsState extends State<Feeds> {
       backgroundColor: Color.fromRGBO(213, 210, 221, 0.1),
       body: StreamBuilder<QuerySnapshot>(
           stream: newsRefs.orderBy('order', descending: true).snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data.docs.length != 0 &&
-                  snapshot.data.docs != null) {
-                return ListView.builder(
-                    itemCount: snapshot.data.docs.length,
-                    itemBuilder: (context, index) {
-                      // used to get indexes of all documents present in collections
-                      dspostid = snapshot.data.docs[
-                          index]; //used to get indexes of all documents present in collections
-                      print(snapshot.data.docs[index].id);
-                      return Post(
-                          ds: dspostid,
-                          newsrefs: newsRefs,
-                          uid: snapshot.data.docs[index]['uid']);
-                      // used to get indexes of all documents present in collections
-                    });
-              } else {
-                return Center(
-                  child: Container(
-                    height: 100,
-                    width: 300,
-                    child: Text(
-                      "Yay 🙌 You Have The Chance To become out first Person To Post Don't Miss this Opportunity",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[500]),
-                    ),
-                  ),
-                );
-              }
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snap) {
+            if (snap.hasData) {
+              return StreamBuilder<QuerySnapshot>(
+                  stream: (FirebaseFirestore.instance
+                      .collection('profile')
+                      .doc(auth.currentUser.uid)
+                      .collection('UserPost')
+                      .orderBy('order', descending: true)
+                      .snapshots()),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snap.data.docs.length != 0) {
+                      return ListView.builder(
+                          itemCount: snap.data.docs.length,
+                          itemBuilder: (context, index) {
+                            dspostid = snap.data.docs[index];
+
+                            return Post(
+                                ds: dspostid,
+                                newsrefs: newsRefs,
+                                uid: snap.data.docs[index]['uid']);
+                          });
+                    } else {
+                      return Center(
+                        child: Container(
+                          height: 100,
+                          width: 300,
+                          child: Text(
+                            "Yay 🙌 You Have The Chance To become out first Person To Post Don't Miss this Opportunity",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[500]),
+                          ),
+                        ),
+                      );
+                    }
+                  });
             } else {
               return Container(
                 child: Text(
@@ -177,8 +203,8 @@ class _MessageState extends State<Message> {
 
   QuerySnapshot snap;
 
-  getUseName() {
-    FirebaseFirestore.instance
+  getUserName() async {
+    await FirebaseFirestore.instance
         .collection('profile')
         .where('name', isEqualTo: searchbyname.text)
         .get()
@@ -189,10 +215,37 @@ class _MessageState extends State<Message> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getUseName();
+  void createChatRoom() {
+    String chatRoomId =
+        getChatRoomId(auth.currentUser.displayName, snap.docs[0]['name']);
+
+    List<String> users = [auth.currentUser.displayName, snap.docs[0]['name']];
+
+    Map<String, dynamic> chats = {'users': users, 'chatroomid': chatRoomId};
+
+    FirebaseFirestore.instance
+        .collection('Chatroom')
+        .doc(chatRoomId)
+        .set(chats)
+        .catchError((e) {
+      print(e);
+    });
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => ChatRoom(
+                  usersnap: snap,
+                  chatRoomId: chatRoomId,
+                )));
+  }
+
+  String getChatRoomId(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
   }
 
   Widget searchList() {
@@ -206,14 +259,14 @@ class _MessageState extends State<Message> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text(snap.docs[0]['name']),
+                    Text(snap.docs[index]['name']),
                     RaisedButton(
                         color: Colors.blue,
                         child: Text(
                           "Message",
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
-                        onPressed: () {}),
+                        onPressed: createChatRoom),
                   ],
                 ),
               );
@@ -232,11 +285,12 @@ class _MessageState extends State<Message> {
                 Expanded(
                     child: TextField(
                   controller: searchbyname,
+                  decoration: InputDecoration(hintText: "Enter Name"),
                 )),
                 IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () {
-                      getUseName();
+                      getUserName();
                     })
               ],
             ),

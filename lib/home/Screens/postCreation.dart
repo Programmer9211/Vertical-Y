@@ -11,8 +11,8 @@ class CreatePost extends StatefulWidget {
 }
 
 class _CreatePostState extends State<CreatePost> {
-  static final TimeOfDay timenow = TimeOfDay.now();
-  static final DateTime dateTime = DateTime.now();
+  TimeOfDay timenow = TimeOfDay.now();
+  DateTime dateTime = DateTime.now();
   final TextEditingController title = TextEditingController();
 
   @override
@@ -85,14 +85,14 @@ class _CreatePostState extends State<CreatePost> {
                           color: Color.fromRGBO(0, 245, 206, 1.0), width: 2.0),
                     ),
                     child: Text(
-                      "Upload\nPost",
+                      "Upload\n  Post",
                       style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                           color: Color.fromRGBO(0, 245, 206, 1.0)),
                     ),
                     onPressed: () {
-                      widget.newsrefs.doc().set({
+                      Map<String, dynamic> data = {
                         'title': "${title.text}",
                         'name': "${auth.currentUser.displayName}",
                         'order': dateTime,
@@ -100,8 +100,20 @@ class _CreatePostState extends State<CreatePost> {
                         'date': dateTime.toString().split(' ')[0],
                         'uid': auth.currentUser.uid,
                         'likes': 0,
-                        'dislikes': 0
-                      });
+                        'dislikes': 0,
+                        'image': auth.currentUser.photoURL == null
+                            ? ""
+                            : auth.currentUser.photoURL
+                      };
+
+                      widget.newsrefs.doc().set(data);
+
+                      FirebaseFirestore.instance
+                          .collection('profile')
+                          .doc(auth.currentUser.uid)
+                          .collection('UserPost')
+                          .add(data);
+
                       title.clear();
                       Navigator.pop(context);
                     },
@@ -117,7 +129,7 @@ class _CreatePostState extends State<CreatePost> {
                           color: Color.fromRGBO(0, 245, 206, 1.0), width: 2.0),
                     ),
                     child: Text(
-                      "Delete\nPost",
+                      "Delete\n  Post",
                       style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,

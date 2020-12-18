@@ -18,8 +18,6 @@ void signIn(String email, String password, BuildContext context,
         await user.sendEmailVerification(); // verification email aa jayega
       }
 
-      print("${auth.currentUser.providerData}\n");
-
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     }
@@ -57,7 +55,8 @@ void signUp(String email, String password, String userName,
     }
 
     await user.updateProfile(
-        displayName: userName); // user name update ho jayega
+      displayName: userName,
+    );
 
     FirebaseFirestore.instance
         .collection('profile')
@@ -67,7 +66,12 @@ void signUp(String email, String password, String userName,
       'education': "Add Education",
       'profession': "Add Profession",
       'Location': "Add Location",
-      'name': auth.currentUser.displayName
+      'name': auth.currentUser.displayName,
+      'image': "",
+      'uid': auth.currentUser.uid,
+      'followers': 0,
+      'following': 0,
+      'posts': 0
     });
 
     Navigator.pushReplacement(

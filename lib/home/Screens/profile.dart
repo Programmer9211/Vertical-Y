@@ -1,6 +1,12 @@
+import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:not_whatsapp/services/auth.dart';
+import 'package:not_whatsapp/shared/const.dart';
+import 'package:path/path.dart' as Path;
 
 // ignore: must_be_immutable
 class Profile extends StatefulWidget {
@@ -11,6 +17,41 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   CollectionReference _collectionReference =
       FirebaseFirestore.instance.collection('profile');
+
+  File image;
+
+  Future chooseImage() async {
+    final pickedFile =
+        await ImagePicker().getImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        image = File(pickedFile.path);
+      });
+      uploadFile();
+    }
+  }
+
+  Future uploadFile() async {
+    User user = auth.currentUser;
+
+    Reference reference = FirebaseStorage.instance
+        .ref()
+        .child('profilePhoto/${Path.basename(image.path)}');
+
+    UploadTask uploadTask = reference.putFile(image);
+    print("Uploading............................");
+    await uploadTask.whenComplete(() {
+      reference.getDownloadURL().then((fileURL) async {
+        _collectionReference
+            .doc(auth.currentUser.uid)
+            .update({'image': fileURL});
+        await user
+            .updateProfile(photoURL: fileURL)
+            .then((value) => print('URL ADDED -------------------------'));
+      });
+    });
+  }
 
   final controller = TextEditingController();
 
@@ -29,7 +70,7 @@ class _ProfileState extends State<Profile> {
               controller: controller,
             ),
             RaisedButton(
-              color: Color.fromRGBO(0, 245, 206, 1.0),
+                color: Color.fromRGBO(0, 245, 206, 1.0),
                 child: Text("Save"),
                 onPressed: () {
                   _collectionReference
@@ -56,8 +97,11 @@ class _ProfileState extends State<Profile> {
                   stream: _collectionReference
                       .doc(auth.currentUser.uid)
                       .snapshots(),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  builder: (BuildContext context,
+                      AsyncSnapshot<DocumentSnapshot> snapshot) {
                     if (snapshot.hasData) {
+                      profilesnap = snapshot.data;
+
                       return SingleChildScrollView(
                         child: Container(
                           child: Column(
@@ -68,7 +112,8 @@ class _ProfileState extends State<Profile> {
                                   border: Border.symmetric(),
                                 ),
                                 alignment: Alignment.center,
-                                child: Stack(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Padding(
                                       padding: const EdgeInsets.all(10.0),
@@ -81,11 +126,19 @@ class _ProfileState extends State<Profile> {
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(75),
-                                              child:
-                                                  Image.asset("assets/1.jpg"),
+                                              child: snapshot.data['image'] ==
+                                                      ""
+                                                  ? IconButton(
+                                                      icon: Icon(Icons.add_a_photo, color: Color.fromRGBO(0, 245, 206, 1.0),size: 30),
+                                                      onPressed: () {
+                                                        chooseImage();
+                                                      },
+                                                    )
+                                                  : Image.network(
+                                                      snapshot.data['image']),
                                             )),
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -191,17 +244,6 @@ class _ProfileState extends State<Profile> {
               return CircularProgressIndicator();
             }
           }),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () {},
-      //   backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-      //   label: Text(
-      //     "Say Hi 👋",
-      //     style: TextStyle(
-      //         fontSize: 16,
-      //         fontWeight: FontWeight.w500,
-      //         color: Color.fromRGBO(101, 97, 125, 1.0)),
-      //   ),
-      // ),
     );
   }
 }
@@ -252,7 +294,6 @@ class InfoTile extends StatelessWidget {
             ),
           ),
         ),
-        //IconButton(icon: Icon(Icons.edit), onPressed: onTapped)
       ],
     );
   }

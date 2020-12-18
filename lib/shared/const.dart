@@ -16,3 +16,8 @@ const textPostField = InputDecoration(
 );
 
 DocumentSnapshot dspostid;
+DocumentSnapshot profilesnap;
+DocumentSnapshot dspostuserid;
+
+DateTime timestamp = DateTime.now();
+TimeOfDay timeNow = TimeOfDay.now();

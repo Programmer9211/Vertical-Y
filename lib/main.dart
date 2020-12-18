@@ -5,8 +5,7 @@ import 'package:not_whatsapp/home/wapper.dart';
 
 
 
-
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   SystemChrome.setPreferredOrientations(
