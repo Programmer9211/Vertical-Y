@@ -17,7 +17,7 @@ class _SignUpState extends State<SignUp> {
   String email = "";
   String password = "";
   String error = '';
-  bool loading = false;
+  BuildContext dialogcontxt;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,10 +115,17 @@ class _SignUpState extends State<SignUp> {
                 minWidth: 200,
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {
-                    setState(() {
-                      loading = true;
-                    });
-                    signUp(email, password, _name.text, context);
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          dialogcontxt = context;
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        });
+
+                    signUp(email, password, _name.text, context, dialogcontxt);
                   }
                 },
                 color: Color.fromRGBO(0, 245, 206, 1.0),

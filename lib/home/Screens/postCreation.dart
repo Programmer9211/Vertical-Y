@@ -123,7 +123,8 @@ class _CreatePostState extends State<CreatePost> {
                         sendNotification(followersUid[i], {
                           'title': auth.currentUser.displayName,
                           'sub': "has shared a post",
-                          'image': auth.currentUser.photoURL
+                          'image': auth.currentUser.photoURL,
+                          'time': FieldValue.serverTimestamp()
                         });
                       }
                     },
