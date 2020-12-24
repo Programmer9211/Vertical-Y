@@ -7,7 +7,7 @@ import 'package:not_whatsapp/home/home.dart';
 FirebaseAuth auth = FirebaseAuth.instance;
 
 void signIn(String email, String password, BuildContext context,
-    GlobalKey<ScaffoldState> _scaffoldkey) async {
+    GlobalKey<ScaffoldState> _scaffoldkey, BuildContext dialogcontxt) async {
   try {
     final User user = (await auth.signInWithEmailAndPassword(
             email: email, password: password))
@@ -18,25 +18,32 @@ void signIn(String email, String password, BuildContext context,
         await user.sendEmailVerification(); // verification email aa jayega
       }
 
+      Navigator.pop(dialogcontxt);
+
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     }
   } catch (e) {
     switch (e.message) {
       case 'There is no user record corresponding to this identifier. The user may have been deleted.':
+        Navigator.pop(dialogcontxt);
         _scaffoldkey.currentState.showSnackBar(
             SnackBar(content: Text("No User Found Please Create Account")));
+
         break;
       case 'The password is invalid or the user does not have a password.':
+        Navigator.pop(dialogcontxt);
         _scaffoldkey.currentState
             .showSnackBar(SnackBar(content: Text("Invalid email or password")));
         break;
       case 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.':
+        Navigator.pop(dialogcontxt);
         _scaffoldkey.currentState.showSnackBar(
             SnackBar(content: Text("Check your internet connection")));
         break;
       // ...
       default:
+        Navigator.pop(dialogcontxt);
         _scaffoldkey.currentState
             .showSnackBar(SnackBar(content: Text("Unexpected error occured")));
     }
@@ -44,7 +51,7 @@ void signIn(String email, String password, BuildContext context,
 }
 
 void signUp(String email, String password, String userName,
-    BuildContext context) async {
+    BuildContext context, BuildContext dialogcontxt) async {
   final User user = (await auth.createUserWithEmailAndPassword(
           email: email, password: password))
       .user;
@@ -58,7 +65,7 @@ void signUp(String email, String password, String userName,
       displayName: userName,
     );
 
-    FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection('profile')
         .doc(auth.currentUser.uid)
         .set({
@@ -74,16 +81,20 @@ void signUp(String email, String password, String userName,
       'posts': 0
     });
 
+    Navigator.pop(dialogcontxt);
+
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => Home()));
   }
 }
 
-void signout(BuildContext context) async {
+void signout(BuildContext context, BuildContext dialogcontxt) async {
   try {
-    await auth.signOut();
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (_) => Authentication()));
+    await auth.signOut().then((value) {
+      Navigator.pop(dialogcontxt);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => Authentication()));
+    });
   } catch (e) {
     print(e);
   }

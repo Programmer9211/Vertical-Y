@@ -219,24 +219,21 @@ class _ProfileState extends State<Profile> {
                                         backgroundColor:
                                             Color.fromRGBO(0, 245, 206, 1.0),
                                         child: CircleAvatar(
-                                            radius: 75,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(75),
-                                              child: snapshot.data['image'] ==
-                                                      ""
-                                                  ? Image.asset("assets/1.jpg")
-                                                  : Image.network(
+                                          radius: 75,
+                                          backgroundImage:
+                                              snapshot.data['image'] == ""
+                                                  ? AssetImage("assets/1.jpg")
+                                                  : NetworkImage(
                                                       snapshot.data['image']),
-                                            )),
+                                          child: IconButton(
+                                            icon: Icon(Icons.photo),
+                                            onPressed: () {
+                                              chooseImage();
+                                            },
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    IconButton(
-                                      icon: Icon(Icons.photo),
-                                      onPressed: () {
-                                        chooseImage();
-                                      },
-                                    )
                                   ],
                                 ),
                               ),

@@ -4,7 +4,7 @@ import 'package:not_whatsapp/models/Notifications.dart';
 import 'package:not_whatsapp/services/auth.dart';
 
 class ChatRoom extends StatefulWidget {
-  final QuerySnapshot usersnap;
+  final DocumentSnapshot usersnap;
   final String chatRoomId;
 
   ChatRoom({this.usersnap, this.chatRoomId});
@@ -108,7 +108,7 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
             width: size.width / 8,
             child: ClipOval(
               child: Image.network(
-                widget.usersnap.docs[0]['image'],
+                widget.usersnap['image'],
                 fit: BoxFit.cover,
               ),
             ),
@@ -116,7 +116,7 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
           SizedBox(
             width: size.width / 30,
           ),
-          Text(widget.usersnap.docs[0]['name']),
+          Text(widget.usersnap['name']),
         ],
       )),
       body: StreamBuilder<QuerySnapshot>(
@@ -173,10 +173,11 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
                       controller.jumpTo(controller.position.maxScrollExtent);
 
                       if (isNotify == false) {
-                        sendNotification(widget.usersnap.docs[0]['uid'], {
+                        sendNotification(widget.usersnap['uid'], {
                           'title': auth.currentUser.displayName,
                           'sub': "has send you a message",
-                          'image': auth.currentUser.photoURL
+                          'image': auth.currentUser.photoURL,
+                          'time': FieldValue.serverTimestamp()
                         });
                         setState(() {
                           isNotify = true;
