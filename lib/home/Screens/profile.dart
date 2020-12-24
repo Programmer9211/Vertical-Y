@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:not_whatsapp/services/auth.dart';
 import 'package:not_whatsapp/shared/const.dart';
 import 'package:path/path.dart' as Path;
+import 'package:not_whatsapp/home/Screens/ViewProfile.dart';
 
 // ignore: must_be_immutable
 class Profile extends StatefulWidget {
@@ -19,6 +20,34 @@ class _ProfileState extends State<Profile> {
       FirebaseFirestore.instance.collection('profile');
 
   File image;
+  QuerySnapshot followersnap;
+  QuerySnapshot followingsnap;
+
+  @override
+  void initState() {
+    super.initState();
+    getFollower();
+  }
+
+  void getFollower() async {
+    await FirebaseFirestore.instance
+        .collection('profile')
+        .doc(profilesnap.data()['uid'])
+        .collection('followers')
+        .get()
+        .then((value) => setState(() {
+              followersnap = value;
+            }));
+
+    await FirebaseFirestore.instance
+        .collection('profile')
+        .doc(profilesnap.data()['uid'])
+        .collection('following')
+        .get()
+        .then((value) => setState(() {
+              followingsnap = value;
+            }));
+  }
 
   Future chooseImage() async {
     final pickedFile =
@@ -81,6 +110,80 @@ class _ProfileState extends State<Profile> {
                 }),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget infoTile() {
+    return Container(
+      height: MediaQuery.of(context).size.height / 10,
+      width: MediaQuery.of(context).size.width,
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              child: Column(
+                children: [
+                  Text(
+                    "${profilesnap.data()['posts']}",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
+                  Text("Post", style: TextStyle(fontSize: 16)),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ViewFollowers(
+                            followersnap: followersnap,
+                            title: "Followers",
+                            uid: profilesnap.data()['uid'])));
+              },
+              child: Container(
+                child: Column(
+                  children: [
+                    Text(
+                      "${profilesnap.data()['followers']}",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                    Text("Followers", style: TextStyle(fontSize: 16))
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ViewFollowers(
+                            followersnap: followingsnap,
+                            title: "Following",
+                            uid: profilesnap.data()['uid'])));
+              },
+              child: Container(
+                child: Column(
+                  children: [
+                    Text(
+                      "${profilesnap.data()['following']}",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                    Text("Following", style: TextStyle(fontSize: 16))
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -232,6 +335,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                               ),
                               Divider(),
+                              infoTile(),
                             ],
                           ),
                         ),
@@ -244,6 +348,19 @@ class _ProfileState extends State<Profile> {
               return CircularProgressIndicator();
             }
           }),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          print(followersUid);
+        },
+        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
+        label: Text(
+          "Say Hi 👋",
+          style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color.fromRGBO(101, 97, 125, 1.0)),
+        ),
+      ),
     );
   }
 }

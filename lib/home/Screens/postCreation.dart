@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/models/Notifications.dart';
 import 'package:not_whatsapp/services/auth.dart';
+import 'package:not_whatsapp/shared/const.dart';
 
 // ignore: must_be_immutable
 class CreatePost extends StatefulWidget {
@@ -116,6 +118,14 @@ class _CreatePostState extends State<CreatePost> {
 
                       title.clear();
                       Navigator.pop(context);
+
+                      for (int i = 0; i <= followersUid.length; i++) {
+                        sendNotification(followersUid[i], {
+                          'title': auth.currentUser.displayName,
+                          'sub': "has shared a post",
+                          'image': auth.currentUser.photoURL
+                        });
+                      }
                     },
                   ),
                   SizedBox(

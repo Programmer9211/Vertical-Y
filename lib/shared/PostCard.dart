@@ -469,8 +469,8 @@ class _PostState extends State<Post> {
 }
 
 class Comments extends StatelessWidget {
-  CollectionReference newsref;
-  DocumentSnapshot ds;
+  final CollectionReference newsref;
+  final DocumentSnapshot ds;
   Comments({this.newsref, this.ds});
   final TextEditingController title = TextEditingController();
 
@@ -554,7 +554,7 @@ class Comments extends StatelessWidget {
                                 child: CircleAvatar(
                                   radius: 22,
                                   backgroundImage: dsc['image'] == ""
-                                      ? AssetImage("assets/search.png")
+                                      ? AssetImage("assets/1.jpg")
                                       : NetworkImage(dsc['image']),
                                 ),
                               ),

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:not_whatsapp/home/Screens/ChatRoom.dart';
+import 'package:not_whatsapp/models/Notifications.dart';
 import 'package:not_whatsapp/services/auth.dart';
 
 class ViewProfile extends StatefulWidget {
@@ -16,6 +17,7 @@ class ViewProfile extends StatefulWidget {
 
 class _ViewProfileState extends State<ViewProfile> {
   bool showabout = false;
+  bool isNotify = false;
 
   DocumentReference followerefrence;
   DocumentReference followingrefrence;
@@ -228,6 +230,18 @@ class _ViewProfileState extends State<ViewProfile> {
       }
     });
     following();
+
+    if (isNotify == false) {
+      sendNotification(widget.snap.docs[0]['uid'], {
+        'title': auth.currentUser.displayName,
+        'sub': "Started following you",
+        'image': auth.currentUser.photoURL
+      });
+
+      setState(() {
+        isNotify = true;
+      });
+    }
   }
 
   Widget infoTile() {
@@ -517,10 +531,6 @@ class _ViewFollowersState extends State<ViewFollowers> {
   QuerySnapshot updateprofile;
 
   void updateProfile(int index, DocumentSnapshot ds) async {
-    // FirebaseFirestore.instance.runTransaction((transaction) async {
-    //  // DocumentSnapshot ds = await transaction.get();
-    // });
-
     await FirebaseFirestore.instance
         .collection('profile')
         .doc(widget.uid)

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/models/Notifications.dart';
 import 'package:not_whatsapp/services/auth.dart';
 
 class ChatRoom extends StatefulWidget {
@@ -18,6 +19,8 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
+
+  bool isNotify = false;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -168,6 +171,17 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
                       });
                       message.clear();
                       controller.jumpTo(controller.position.maxScrollExtent);
+
+                      if (isNotify == false) {
+                        sendNotification(widget.usersnap.docs[0]['uid'], {
+                          'title': auth.currentUser.displayName,
+                          'sub': "has send you a message",
+                          'image': auth.currentUser.photoURL
+                        });
+                        setState(() {
+                          isNotify = true;
+                        });
+                      }
                     },
                     minWidth: 50,
                     height: 50,
