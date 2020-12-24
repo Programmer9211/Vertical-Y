@@ -235,7 +235,8 @@ class _ViewProfileState extends State<ViewProfile> {
       sendNotification(widget.snap.docs[0]['uid'], {
         'title': auth.currentUser.displayName,
         'sub': "Started following you",
-        'image': auth.currentUser.photoURL
+        'image': auth.currentUser.photoURL,
+        'time': FieldValue.serverTimestamp()
       });
 
       setState(() {
@@ -334,29 +335,40 @@ class _ViewProfileState extends State<ViewProfile> {
             // SizedBox(
             //   height: height / 25,
             // ),
-            Container(
-              decoration: BoxDecoration(
-                  // image: DecorationImage(
-                  //     image: NetworkImage(
-                  //       widget.snap.docs[0]['image'],
-                  //     ),
-                  //     fit: BoxFit.cover)
-                  ),
-              height: height / 2.8,
-              width: width,
-              child: ClipRRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: CircleAvatar(
-                    radius: 180,
-                    backgroundColor: Colors.blue,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ViewProfilePhoto(
+                              title: widget.snap.docs[0]['name'],
+                              url: widget.snap.docs[0]['image'],
+                            )));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    // image: DecorationImage(
+                    //     image: NetworkImage(
+                    //       widget.snap.docs[0]['image'],
+                    //     ),
+                    //     fit: BoxFit.cover)
+                    ),
+                height: height / 2.8,
+                width: width,
+                child: ClipRRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                     child: CircleAvatar(
-                      radius: 120,
-                      backgroundImage: widget.snap.docs[0]['image'] != ""
-                          ? NetworkImage(
-                              widget.snap.docs[0]['image'],
-                            )
-                          : AssetImage('assets/search.png'),
+                      radius: 180,
+                      backgroundColor: Colors.blue,
+                      child: CircleAvatar(
+                        radius: 120,
+                        backgroundImage: widget.snap.docs[0]['image'] != ""
+                            ? NetworkImage(
+                                widget.snap.docs[0]['image'],
+                              )
+                            : AssetImage('assets/search.png'),
+                      ),
                     ),
                   ),
                 ),
@@ -436,7 +448,7 @@ class _ViewProfileState extends State<ViewProfile> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) => ChatRoom(
-                                              usersnap: widget.snap,
+                                              usersnap: widget.snap.docs[0],
                                               chatRoomId: chatRoomId,
                                             )));
                               })
@@ -618,6 +630,23 @@ class _ViewFollowersState extends State<ViewFollowers> {
               return Container();
             }
           }),
+    );
+  }
+}
+
+class ViewProfilePhoto extends StatelessWidget {
+  final String title, url, asset;
+
+  ViewProfilePhoto({this.title, this.url, this.asset});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body:
+          Center(child: url == null ? Image.asset(asset) : Image.network(url)),
     );
   }
 }

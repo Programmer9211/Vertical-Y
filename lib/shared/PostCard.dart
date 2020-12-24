@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:not_whatsapp/home/Screens/ChatRoom.dart';
 import 'package:not_whatsapp/home/Screens/ViewProfile.dart';
+import 'package:not_whatsapp/models/Notifications.dart';
 import 'package:not_whatsapp/services/auth.dart';
 
 import 'const.dart';
@@ -26,6 +27,7 @@ class _PostState extends State<Post> {
   DocumentReference imagerefs;
   Map<String, dynamic> data;
   Map<String, dynamic> dislikedata;
+  bool isViewingProfile = false;
 
   final CollectionReference userSpecificPost = FirebaseFirestore.instance
       .collection('profile')
@@ -187,6 +189,8 @@ class _PostState extends State<Post> {
     });
   }
 
+  BuildContext dialogcontxt;
+
   void popupMenuOnTapped(value) async {
     if (value == 0) {
       QuerySnapshot snap;
@@ -227,18 +231,29 @@ class _PostState extends State<Post> {
             context,
             MaterialPageRoute(
                 builder: (_) => ChatRoom(
-                      usersnap: snap,
+                      usersnap: snap.docs[0],
                       chatRoomId: chatRoomId,
                     )));
       });
     } else if (value == 1) {
       widget.newsrefs.doc(widget.ds.id).delete();
     } else if (value == 2) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            dialogcontxt = context;
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          });
+
       await FirebaseFirestore.instance
           .collection('profile')
           .where('name', isEqualTo: widget.ds['name'])
           .get()
           .then((value) {
+        Navigator.pop(dialogcontxt);
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -253,6 +268,7 @@ class _PostState extends State<Post> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
+
     return Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 8),
         child: Material(
@@ -266,7 +282,43 @@ class _PostState extends State<Post> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      SizedBox(
+                        width: width / 40,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0, left: 4.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => ViewProfilePhoto(
+                                          title: widget.ds['name'],
+                                          url: widget.ds['image'] == ""
+                                              ? null
+                                              : widget.ds['image'],
+                                          asset: widget.ds['image'] == ""
+                                              ? "asset/search.png"
+                                              : null,
+                                        )));
+                          },
+                          child: CircleAvatar(
+                            radius: 27,
+                            backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+                            child: CircleAvatar(
+                              radius: 24,
+                              backgroundImage: widget.ds['image'] == ""
+                                  ? AssetImage("assets/search.png")
+                                  : NetworkImage(widget.ds['image']),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: width / 20,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(
                             width: width / 40,
@@ -508,6 +560,12 @@ class Comments extends StatelessWidget {
                       });
 
                       title.clear();
+
+                      sendNotification(ds['uid'], {
+                        'title': auth.currentUser.displayName,
+                        'image': auth.currentUser.photoURL,
+                        'sub': "has comented on your post"
+                      });
                     },
                     minWidth: 50,
                     height: 50,

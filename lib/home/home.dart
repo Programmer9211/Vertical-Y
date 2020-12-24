@@ -45,7 +45,6 @@ class _HomeState extends State<Home> {
         .then((value) {
       setState(() {
         profilesnap = value;
-        print(value);
       });
     });
   }
@@ -90,7 +89,19 @@ class _HomeState extends State<Home> {
                   color: Color.fromRGBO(101, 97, 125, 1.0),
                 ),
                 onPressed: () {
-                  signout(context);
+                  BuildContext dialogcontxt;
+
+                  showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) {
+                        dialogcontxt = context;
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      });
+
+                  signout(context, dialogcontxt);
                 })
           ],
           bottom: TabBar(
@@ -206,8 +217,6 @@ class _FeedsState extends State<Feeds> {
   }
 }
 
-// ignore: must_be_immutable
-
 class Message extends StatefulWidget {
   @override
   _MessageState createState() => _MessageState();
@@ -217,6 +226,8 @@ class _MessageState extends State<Message> {
   TextEditingController searchbyname = TextEditingController();
 
   QuerySnapshot snap;
+
+  QuerySnapshot chatsnap;
 
   getUserName() async {
     await FirebaseFirestore.instance
@@ -230,11 +241,14 @@ class _MessageState extends State<Message> {
     });
   }
 
-  void createChatRoom() {
-    String chatRoomId =
-        getChatRoomId(auth.currentUser.displayName, snap.docs[0]['name']);
+  void createChatRoom(DocumentSnapshot ds) {
+    String chatRoomId = getChatRoomId(auth.currentUser.displayName,
+        ds == null ? snap.docs[0]['name'] : ds['name']);
 
-    List<String> users = [auth.currentUser.displayName, snap.docs[0]['name']];
+    List<String> users = [
+      auth.currentUser.displayName,
+      ds == null ? snap.docs[0]['name'] : ds['name']
+    ];
 
     Map<String, dynamic> chats = {'users': users, 'chatroomid': chatRoomId};
 
@@ -246,11 +260,33 @@ class _MessageState extends State<Message> {
       print(e);
     });
 
+    FirebaseFirestore.instance
+        .collection('profile')
+        .doc(auth.currentUser.uid)
+        .collection('chats')
+        .doc(snap.docs[0]['uid'])
+        .set({
+      'name': snap.docs[0]['name'],
+      'image': snap.docs[0]['image'],
+      'uid': snap.docs[0]['uid']
+    });
+
+    FirebaseFirestore.instance
+        .collection('profile')
+        .doc(snap.docs[0]['uid'])
+        .collection('chats')
+        .doc(auth.currentUser.uid)
+        .set({
+      'name': auth.currentUser.displayName,
+      'image': auth.currentUser.photoURL,
+      'uid': auth.currentUser.uid
+    });
+
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (_) => ChatRoom(
-                  usersnap: snap,
+                  usersnap: ds == null ? snap.docs[0] : ds,
                   chatRoomId: chatRoomId,
                 )));
   }
@@ -268,21 +304,26 @@ class _MessageState extends State<Message> {
         ? ListView.builder(
             itemCount: snap.docs.length,
             itemBuilder: (context, index) {
-              return Container(
-                height: MediaQuery.of(context).size.height / 12,
-                width: MediaQuery.of(context).size.width / 1.2,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text(snap.docs[index]['name']),
-                    RaisedButton(
-                        color: Colors.blue,
-                        child: Text(
-                          "Message",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
-                        onPressed: createChatRoom),
-                  ],
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: ListTile(
+                  focusColor: Color.fromRGBO(0, 245, 206, 1.0),
+                  title: Text(snap.docs[index]['name']),
+                  leading: CircleAvatar(
+                    radius: 25,
+                    backgroundImage: NetworkImage(snap.docs[index]['image']),
+                  ),
+                  trailing: RaisedButton(
+                      textColor: Color.fromRGBO(0, 245, 206, 1.0),
+                      child: Text(
+                        "Message",
+                      ),
+                      color: Color.fromRGBO(101, 97, 125, 1.0),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      onPressed: () {
+                        createChatRoom(null);
+                      }),
                 ),
               );
             })
@@ -291,31 +332,90 @@ class _MessageState extends State<Message> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            child: Row(
-              children: [
-                Expanded(
-                    child: TextField(
-                  controller: searchbyname,
-                  decoration: InputDecoration(hintText: "Enter Name"),
-                )),
-                IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      getUserName();
-                    })
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              color: Color.fromRGBO(0, 245, 206, 1.0),
+              child: Padding(
+                padding: MediaQuery.of(context).viewInsets,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                            controller: searchbyname,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              hintText: "'Search here'",
+                            )),
+                      ),
+                      SizedBox(width: 10),
+                      MaterialButton(
+                          elevation: 0.0,
+                          child: Icon(Icons.search,
+                              color: Color.fromRGBO(0, 245, 206, 1.0),
+                              size: 30),
+                          onPressed: () {
+                            getUserName();
+                          },
+                          minWidth: 50,
+                          height: 50,
+                          color: Color.fromRGBO(101, 97, 125, 1.0))
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height / 12,
-            width: MediaQuery.of(context).size.width / 1.2,
-            child: searchList(),
-          )
-        ],
+            SizedBox(
+              height: height / 50,
+            ),
+            snap != null
+                ? Container(
+                    height: height / 12,
+                    child: searchList(),
+                  )
+                : Container(),
+            Container(
+                height: height / 1.5,
+                width: width,
+                child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('profile')
+                        .doc(auth.currentUser.uid)
+                        .collection('chats')
+                        .snapshots(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.data != null) {
+                        return ListView.builder(
+                            itemCount: snapshot.data.docs.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                onTap: () {
+                                  print(snapshot.data.docs[index]['name']);
+                                  createChatRoom(snapshot.data.docs[index]);
+                                },
+                                leading: CircleAvatar(
+                                  radius: 25,
+                                  backgroundImage: NetworkImage(
+                                      snapshot.data.docs[index]['image']),
+                                ),
+                                title: Text(snapshot.data.docs[index]['name']),
+                              );
+                            });
+                      } else {
+                        return Container();
+                      }
+                    })),
+          ],
+        ),
       ),
     );
   }
@@ -335,6 +435,7 @@ class _NotificationsState extends State<Notifications> {
             .collection('profile')
             .doc(auth.currentUser.uid)
             .collection('notify')
+            .orderBy('time', descending: true)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.data != null) {
