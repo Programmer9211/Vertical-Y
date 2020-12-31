@@ -326,15 +326,16 @@ class _ViewProfileState extends State<ViewProfile> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text("${widget.snap.docs[0]['name']}' s profile"),
+        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
+        title: Text(
+          "${widget.snap.docs[0]['name']}'s Profile",
+          style:
+              TextStyle(fontSize: 25, color: Color.fromRGBO(101, 97, 125, 1.0)),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // SizedBox(
-            //   height: height / 25,
-            // ),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -346,23 +347,17 @@ class _ViewProfileState extends State<ViewProfile> {
                             )));
               },
               child: Container(
-                decoration: BoxDecoration(
-                    // image: DecorationImage(
-                    //     image: NetworkImage(
-                    //       widget.snap.docs[0]['image'],
-                    //     ),
-                    //     fit: BoxFit.cover)
-                    ),
+                color: Colors.grey[200],
                 height: height / 2.8,
                 width: width,
                 child: ClipRRect(
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                     child: CircleAvatar(
-                      radius: 180,
-                      backgroundColor: Colors.blue,
+                      radius: 120,
+                      backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
                       child: CircleAvatar(
-                        radius: 120,
+                        radius: 110,
                         backgroundImage: widget.snap.docs[0]['image'] != ""
                             ? NetworkImage(
                                 widget.snap.docs[0]['image'],
@@ -375,25 +370,30 @@ class _ViewProfileState extends State<ViewProfile> {
               ),
             ),
             Container(
-              height: height / 10,
               width: width,
               alignment: Alignment.center,
-              child: Text(
-                widget.snap.docs[0]['name'],
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-              ),
+              child: Text(widget.snap.docs[0]['name'],
+                  style: TextStyle(
+                      fontSize: 35,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(101, 97, 125, 1.0))),
+            ),
+            Divider(
+              thickness: 2,
             ),
             Container(
               child: Text(
                 widget.snap.docs[0]['bio'] == "Add Bio"
-                    ? "No bio added yet"
+                    ? "No bio Added Yet"
                     : widget.snap.docs[0]['bio'],
                 style: TextStyle(
                   fontSize: 16,
                 ),
               ),
             ),
-
+            Divider(
+              thickness: 2,
+            ),
             auth.currentUser.uid != widget.snap.docs[0]['uid']
                 ? Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -405,10 +405,10 @@ class _ViewProfileState extends State<ViewProfile> {
                         children: [
                           RaisedButton(
                               padding: EdgeInsets.symmetric(horizontal: 40),
-                              color: Colors.white,
+                              color: Color.fromRGBO(101, 97, 125, 1.0),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(width: 2.0)),
+                                  side: BorderSide.none),
                               child: Text(
                                 data != null
                                     ? data.containsKey(auth.currentUser.uid)
@@ -416,19 +416,21 @@ class _ViewProfileState extends State<ViewProfile> {
                                         : " Follow"
                                     : "Follow",
                                 style: TextStyle(
-                                    fontSize: 18, color: Colors.black),
+                                    fontSize: 18,
+                                    color: Color.fromRGBO(0, 245, 206, 1.0)),
                               ),
                               onPressed: follow),
                           RaisedButton(
                               padding: EdgeInsets.symmetric(horizontal: 30),
-                              color: Colors.white,
+                              color: Color.fromRGBO(101, 97, 125, 1.0),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(width: 2.0)),
+                                  side: BorderSide.none),
                               child: Text(
                                 "Message",
                                 style: TextStyle(
-                                    fontSize: 18, color: Colors.black),
+                                    fontSize: 18,
+                                    color: Color.fromRGBO(0, 245, 206, 1.0)),
                               ),
                               onPressed: () {
                                 String getChatRoomId(String a, String b) {
@@ -451,7 +453,7 @@ class _ViewProfileState extends State<ViewProfile> {
                                               usersnap: widget.snap.docs[0],
                                               chatRoomId: chatRoomId,
                                             )));
-                              })
+                              }),
                         ],
                       ),
                     ),
@@ -459,36 +461,39 @@ class _ViewProfileState extends State<ViewProfile> {
                 : Container(
                     height: height / 18,
                   ),
-
             infoTile(),
-
             GestureDetector(
               onTap: () {
                 setState(() {
                   showabout = !showabout;
                 });
               },
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.black, width: 2)),
-                height: height / 14,
-                width: width / 1.02,
-                child: Row(
-                  children: [
-                    Container(
-                      width: width / 1.2,
-                      child: Text(
-                        "  View about ${widget.snap.docs[0]['name']}",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500),
+              child: Padding(
+                padding: const EdgeInsets.only(right:8.0, left: 8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Color.fromRGBO(0, 245, 206, 1.0), width: 2)),
+                  height: height / 14,
+                  width: width / 1.02,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: width / 1.2,
+                        child: Text(
+                          "  View about ${widget.snap.docs[0]['name']}",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500, color: Color.fromRGBO(0, 245, 206, 1.0)),
+                        ),
                       ),
-                    ),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      size: 40,
-                    )
-                  ],
+                      Icon(
+                        Icons.arrow_drop_down,
+                        color: Color.fromRGBO(0, 245, 206, 1.0),
+                        size: 40,
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -499,7 +504,7 @@ class _ViewProfileState extends State<ViewProfile> {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(Icons.location_on),
+                          leading: Icon(Icons.location_on,),
                           title: Text(
                               widget.snap.docs[0]['Location'] == "Add Location"
                                   ? "No Location Added Yet"
@@ -580,8 +585,13 @@ class _ViewFollowersState extends State<ViewFollowers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.white,
+        title: Text(
+          widget.title,
+          style: TextStyle(
+            color: Color.fromRGBO(101, 97, 125, 1.0),fontSize: 24
+          ),
+        ),
+        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
       ),
       body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -601,9 +611,10 @@ class _ViewFollowersState extends State<ViewFollowers> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 4.0, horizontal: 8),
                       child: Material(
+                        color: Color.fromRGBO(101, 97, 125, 1.0),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
-                            side: BorderSide(width: 1.5)),
+                            side: BorderSide.none),
                         elevation: 4,
                         child: ListTile(
                           contentPadding:
@@ -611,16 +622,15 @@ class _ViewFollowersState extends State<ViewFollowers> {
                           onTap: () => onTap(context, index, ds),
                           trailing: Text(
                             "View Profile",
-                            style: TextStyle(fontSize: 18, color: Colors.black),
+                            style: TextStyle(fontSize: 14, color: Color.fromRGBO(0, 245, 206, 1.0)),
                           ),
                           leading: CircleAvatar(
                             radius: 35,
                             backgroundImage: NetworkImage(ds['image']),
-
-                            //fit: BoxFit.cover,
                           ),
                           title: Text(
                             ds['name'],
+                            style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 245, 206, 1.0)),
                           ),
                         ),
                       ),

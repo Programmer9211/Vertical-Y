@@ -232,7 +232,7 @@ class _ProfileState extends State<Profile> {
                                                   : NetworkImage(
                                                       snapshot.data['image']),
                                           child: IconButton(
-                                            icon: Icon(Icons.photo),
+                                            icon: Icon(Icons.photo, size: 30, color: Colors.grey.withOpacity(0.2),),
                                             onPressed: () {
                                               chooseImage();
                                             },
@@ -334,6 +334,7 @@ class _ProfileState extends State<Profile> {
                               ),
                               Divider(),
                               infoTile(),
+                              Divider(height: 0.2),
                             ],
                           ),
                         ),
@@ -346,19 +347,6 @@ class _ProfileState extends State<Profile> {
               return CircularProgressIndicator();
             }
           }),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          print(followersUid);
-        },
-        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-        label: Text(
-          "Say Hi 👋",
-          style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Color.fromRGBO(101, 97, 125, 1.0)),
-        ),
-      ),
     );
   }
 }

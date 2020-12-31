@@ -282,57 +282,37 @@ class _PostState extends State<Post> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(
-                        width: width / 40,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => ViewProfilePhoto(
-                                          title: widget.ds['name'],
-                                          url: widget.ds['image'] == ""
-                                              ? null
-                                              : widget.ds['image'],
-                                          asset: widget.ds['image'] == ""
-                                              ? "asset/search.png"
-                                              : null,
-                                        )));
-                          },
-                          child: CircleAvatar(
-                            radius: 27,
-                            backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
-                            child: CircleAvatar(
-                              radius: 24,
-                              backgroundImage: widget.ds['image'] == ""
-                                  ? AssetImage("assets/search.png")
-                                  : NetworkImage(widget.ds['image']),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: width / 20,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
                           SizedBox(
                             width: width / 40,
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-                            child: CircleAvatar(
-                              radius: 27,
-                              backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => ViewProfilePhoto(
+                                              title: widget.ds['name'],
+                                              url: widget.ds['image'] == ""
+                                                  ? null
+                                                  : widget.ds['image'],
+                                              asset: widget.ds['image'] == ""
+                                                  ? "asset/search.png"
+                                                  : null,
+                                            )));
+                              },
                               child: CircleAvatar(
-                                radius: 24,
-                                backgroundImage: widget.ds['image'] == ""
-                                    ? AssetImage("assets/search.png")
-                                    : NetworkImage(widget.ds['image']),
+                                radius: 27,
+                                backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+                                child: CircleAvatar(
+                                  radius: 24,
+                                  backgroundImage: widget.ds['image'] == ""
+                                      ? AssetImage("assets/search.png")
+                                      : NetworkImage(widget.ds['image']),
+                                ),
                               ),
                             ),
                           ),
@@ -342,27 +322,48 @@ class _PostState extends State<Post> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(height: 2),
-                              Text(
-                                "${widget.ds['name']}",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromRGBO(101, 97, 125, 1.0),
-                                ),
+                              // Padding(
+                              //   padding: const EdgeInsets.only(top: 4.0, left: 4.0),
+                              //   child: CircleAvatar(
+                              //     radius: 27,
+                              //     backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+                              //     child: CircleAvatar(
+                              //       radius: 24,
+                              //       backgroundImage: widget.ds['image'] == ""
+                              //           ? AssetImage("assets/search.png")
+                              //           : NetworkImage(widget.ds['image']),
+                              //     ),
+                              //   ),
+                              // ),
+                              SizedBox(
+                                width: width / 20,
                               ),
-                              SizedBox(height: 2),
-                              Text(
-                                "Bio",
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.grey[700]),
-                              ),
-                              Text(
-                                "${widget.ds['date']} || ${widget.ds['time']},",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey[500]),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2),
+                                  Text(
+                                    "${widget.ds['name']}",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromRGBO(101, 97, 125, 1.0),
+                                    ),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    "Bio",
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.grey[700]),
+                                  ),
+                                  Text(
+                                    "${widget.ds['date']} || ${widget.ds['time']},",
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey[500]),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
