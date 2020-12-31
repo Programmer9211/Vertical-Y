@@ -88,12 +88,18 @@ class _ProfileState extends State<Profile> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Color.fromRGBO(220, 220, 230, 1.0),
         title: Column(
           children: [
-            TextField(
+            Text(
+              "EDIT ${collection.toUpperCase()}",
+              style: TextStyle(color: Colors.black),
+            ),
+            TextFormField(
               controller: controller,
             ),
             RaisedButton(
+                color: Color.fromRGBO(0, 245, 206, 1.0),
                 child: Text("Save"),
                 onPressed: () {
                   _collectionReference
@@ -226,7 +232,7 @@ class _ProfileState extends State<Profile> {
                                                   : NetworkImage(
                                                       snapshot.data['image']),
                                           child: IconButton(
-                                            icon: Icon(Icons.photo),
+                                            icon: Icon(Icons.photo, size: 30, color: Colors.grey.withOpacity(0.2),),
                                             onPressed: () {
                                               chooseImage();
                                             },
@@ -249,6 +255,7 @@ class _ProfileState extends State<Profile> {
                               ),
                               Row(
                                 children: [
+                                  SizedBox(width: 10),
                                   Container(
                                     alignment: Alignment.center,
                                     width: MediaQuery.of(context).size.width /
@@ -263,11 +270,19 @@ class _ProfileState extends State<Profile> {
                                       ),
                                     ),
                                   ),
-                                  IconButton(
-                                      icon: Icon(Icons.edit),
-                                      onPressed: () {
-                                        onTapped('bio');
-                                      })
+                                  SizedBox(width: 10),
+                                  InkWell(
+                                    onTap: () {
+                                      onTapped('bio');
+                                    },
+                                    child: Text(
+                                      "Edit",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                               Divider(
@@ -291,18 +306,16 @@ class _ProfileState extends State<Profile> {
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
+                                      SizedBox(height: 20),
                                       InfoTile(
-                                        icon: Icons.work,
+                                        icon: Icons.language,
                                         title: snapshot.data['education'],
                                         onTapped: () {
                                           onTapped('education');
                                         },
                                       ),
                                       InfoTile(
-                                        icon: Icons.work,
+                                        icon: Icons.location_on,
                                         title: snapshot.data['Location'],
                                         onTapped: () {
                                           onTapped('Location');
@@ -321,6 +334,7 @@ class _ProfileState extends State<Profile> {
                               ),
                               Divider(),
                               infoTile(),
+                              Divider(height: 0.2),
                             ],
                           ),
                         ),
@@ -333,19 +347,6 @@ class _ProfileState extends State<Profile> {
               return CircularProgressIndicator();
             }
           }),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          print(followersUid);
-        },
-        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-        label: Text(
-          "Say Hi 👋",
-          style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Color.fromRGBO(101, 97, 125, 1.0)),
-        ),
-      ),
     );
   }
 }
@@ -359,30 +360,44 @@ class InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2.0),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: Color.fromRGBO(101, 97, 125, 1.0),
-          ),
-          SizedBox(
-            width: width / 20,
-          ),
-          Container(
-            width: width / 1.37,
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey[600],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: Color.fromRGBO(101, 97, 125, 1.0),
               ),
+              SizedBox(
+                width: width / 20,
+              ),
+              Container(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        InkWell(
+          onTap: onTapped,
+          child: Text(
+            "Edit",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.blue,
             ),
           ),
-          IconButton(icon: Icon(Icons.edit), onPressed: onTapped)
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

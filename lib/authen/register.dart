@@ -144,7 +144,7 @@ class _SignUpState extends State<SignUp> {
               ),
               SizedBox(height: 40),
               Text(
-                "Created By 3Divyanshu \u{1f47b}",
+                "Created By 3Divyanshu and Aditya \u{1f47b}",
                 style: TextStyle(color: Colors.white, fontSize: 12),
               ),
             ],

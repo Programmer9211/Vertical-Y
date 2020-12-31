@@ -304,10 +304,9 @@ class _MessageState extends State<Message> {
         ? ListView.builder(
             itemCount: snap.docs.length,
             itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              return Card(
                 child: ListTile(
-                  tileColor: Color.fromRGBO(0, 245, 206, 1.0),
+                  focusColor: Color.fromRGBO(0, 245, 206, 1.0),
                   title: Text(snap.docs[index]['name']),
                   leading: CircleAvatar(
                     radius: 25,
@@ -327,7 +326,18 @@ class _MessageState extends State<Message> {
                 ),
               );
             })
-        : Container();
+        : Container(
+            color: Colors.white,
+            width: 100,
+            height: 50,
+            child: Text(
+              "No Person Found in Record",
+              style: TextStyle(
+                  color: Color.fromRGBO(101, 97, 125, 1.0),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800),
+            ),
+          );
   }
 
   @override
@@ -397,17 +407,23 @@ class _MessageState extends State<Message> {
                         return ListView.builder(
                             itemCount: snapshot.data.docs.length,
                             itemBuilder: (context, index) {
-                              return ListTile(
+                              return GestureDetector(
                                 onTap: () {
-                                  print(snapshot.data.docs[index]['name']);
-                                  createChatRoom(snapshot.data.docs[index]);
-                                },
-                                leading: CircleAvatar(
-                                  radius: 25,
-                                  backgroundImage: NetworkImage(
-                                      snapshot.data.docs[index]['image']),
+                                    print(snapshot.data.docs[index]['name']);
+                                    createChatRoom(snapshot.data.docs[index]);
+                                  },
+                                child: Card(
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      radius: 25,
+                                      backgroundImage: NetworkImage(
+                                          snapshot.data.docs[index]['image']),
+                                    ),
+                                    title:
+                                        Text(snapshot.data.docs[index]['name']),
+                                        trailing: Icon(Icons.message, color:Color.fromRGBO(101, 97, 125, 1.0),),
+                                  ),
                                 ),
-                                title: Text(snapshot.data.docs[index]['name']),
                               );
                             });
                       } else {
@@ -443,12 +459,14 @@ class _NotificationsState extends State<Notifications> {
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data.docs[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(ds['image']),
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(ds['image']),
+                      ),
+                      title: Text(ds['title']),
+                      subtitle: Text(ds['sub']),
                     ),
-                    title: Text(ds['title']),
-                    subtitle: Text(ds['sub']),
                   );
                 });
           } else {

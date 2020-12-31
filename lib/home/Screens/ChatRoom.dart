@@ -62,8 +62,8 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
                   Container(
                     decoration: BoxDecoration(
                         color: ds['Sendby'] == auth.currentUser.displayName
-                            ? Colors.blue
-                            : Colors.grey,
+                            ? Color.fromRGBO(0, 185, 157, 1.0)
+                            : Color.fromRGBO(101, 97, 125, 1.0),
                         borderRadius:
                             ds['Sendby'] == auth.currentUser.displayName
                                 ? BorderRadius.only(
@@ -78,13 +78,15 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
                     child: Text(
                       ds['message'],
                       style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white),
                     ),
                   ),
                   Text(
                     ds['currenttime'],
+                    style: TextStyle(
+                        color: Color.fromRGBO(101, 97, 125, 1.0), fontSize: 12),
                   ),
                 ],
               ),
@@ -100,25 +102,46 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      backgroundColor: Color.fromRGBO(220, 220, 230, 1.0),
       appBar: AppBar(
+          backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
           title: Row(
-        children: [
-          Container(
-            height: size.height / 12.9,
-            width: size.width / 8,
-            child: ClipOval(
-              child: Image.network(
-                widget.usersnap['image'],
-                fit: BoxFit.cover,
+            children: [
+              Container(
+                child: CircleAvatar(
+                  radius: 27,
+                  backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+                  child: CircleAvatar(
+                    radius: 24,
+                    child: Image.network(
+                      widget.usersnap['image'],
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          SizedBox(
-            width: size.width / 30,
-          ),
-          Text(widget.usersnap['name']),
-        ],
-      )),
+              // Container(
+              //   height: size.height / 12.9,
+              //   width: size.width / 8,
+              //   child: ClipOval(
+              //     child: Image.network(
+              //       widget.usersnap['image'],
+              //       fit: BoxFit.cover,
+              //     ),
+              //   ),
+              // ),
+              SizedBox(
+                width: size.width / 30,
+              ),
+              Text(
+                widget.usersnap['name'],
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Color.fromRGBO(101, 97, 125, 1.0),
+                ),
+              ),
+            ],
+          )),
       body: StreamBuilder<QuerySnapshot>(
           stream: chatRoom
               .doc(widget.chatRoomId)

@@ -146,7 +146,7 @@ class _AuthenticateState extends State<Authenticate> {
                 ),
                 SizedBox(height: 50),
                 Text(
-                  "Created By 3Divyanshu \u{1f47b}",
+                  "Created By 3Divyanshu and Aditya \u{1f47b}",
                   style: TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ],
