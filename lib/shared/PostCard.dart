@@ -46,10 +46,6 @@ class _PostState extends State<Post> {
         .collection('profile')
         .doc(auth.currentUser.uid);
     super.initState();
-
-    // if (profilesnap.data()['uid'] == dspostid['uid']) {
-    //   widget.newsrefs.doc(widget.ds.id).update({'image': profilesnap['image']});
-    // }
     updateProfile();
     ref();
   }
@@ -71,7 +67,7 @@ class _PostState extends State<Post> {
             await transaction.get(widget.newsrefs.doc(widget.ds.id));
         if (imagereference.exists) {
           transaction.update(widget.newsrefs.doc(widget.ds.id),
-              {'image': auth.currentUser.photoURL});
+              {'image': auth.currentUser.photoURL, 'bio': profilesnap['bio']});
         }
       });
     }
@@ -233,6 +229,7 @@ class _PostState extends State<Post> {
                 builder: (_) => ChatRoom(
                       usersnap: snap.docs[0],
                       chatRoomId: chatRoomId,
+                      isFromNotify: false,
                     )));
       });
     } else if (value == 1) {
@@ -258,7 +255,8 @@ class _PostState extends State<Post> {
             context,
             MaterialPageRoute(
                 builder: (_) => ViewProfile(
-                      snap: value,
+                      snap: value.docs[0],
+                      isFromNotify: false,
                     )));
       });
     }
@@ -306,7 +304,8 @@ class _PostState extends State<Post> {
                               },
                               child: CircleAvatar(
                                 radius: 27,
-                                backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+                                backgroundColor:
+                                    Color.fromRGBO(101, 97, 125, 1.0),
                                 child: CircleAvatar(
                                   radius: 24,
                                   backgroundImage: widget.ds['image'] == ""
@@ -322,19 +321,6 @@ class _PostState extends State<Post> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Padding(
-                              //   padding: const EdgeInsets.only(top: 4.0, left: 4.0),
-                              //   child: CircleAvatar(
-                              //     radius: 27,
-                              //     backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
-                              //     child: CircleAvatar(
-                              //       radius: 24,
-                              //       backgroundImage: widget.ds['image'] == ""
-                              //           ? AssetImage("assets/search.png")
-                              //           : NetworkImage(widget.ds['image']),
-                              //     ),
-                              //   ),
-                              // ),
                               SizedBox(
                                 width: width / 20,
                               ),
@@ -352,7 +338,9 @@ class _PostState extends State<Post> {
                                   ),
                                   SizedBox(height: 2),
                                   Text(
-                                    "Bio",
+                                    widget.ds['bio'] == "Add Bio"
+                                        ? "Add Bio"
+                                        : widget.ds['bio'],
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.grey[700]),
                                   ),
@@ -369,7 +357,6 @@ class _PostState extends State<Post> {
                           ),
                         ],
                       ),
-                      
                       PopupMenuButton(
                           onSelected: (value) async {
                             popupMenuOnTapped(value);
@@ -649,19 +636,19 @@ class Comments extends StatelessWidget {
               }
             } else {
               return Center(
-                        child: Container(
-                          height: 100,
-                          width: 300,
-                          child: Text(
-                            "Comment and present your valuable view this let people know your existence 👌",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[500]),
-                          ),
-                        ),
-                      );
+                child: Container(
+                  height: 100,
+                  width: 300,
+                  child: Text(
+                    "Comment and present your valuable view this let people know your existence 👌",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[500]),
+                  ),
+                ),
+              );
             }
           }),
     );

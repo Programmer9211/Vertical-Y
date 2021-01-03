@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:not_whatsapp/home/Screens/ChatRoom.dart';
 import 'package:not_whatsapp/models/Notifications.dart';
 import 'package:not_whatsapp/services/auth.dart';
+import 'package:not_whatsapp/shared/const.dart';
 
 class ViewProfile extends StatefulWidget {
-  final QuerySnapshot snap;
+  final DocumentSnapshot snap;
+  final bool isFromNotify;
 
-  ViewProfile({this.snap});
+  ViewProfile({this.snap, this.isFromNotify});
 
   @override
   _ViewProfileState createState() => _ViewProfileState();
@@ -33,12 +35,12 @@ class _ViewProfileState extends State<ViewProfile> {
   void initState() {
     followerefrence = FirebaseFirestore.instance
         .collection('followers')
-        .doc(auth.currentUser.uid + ":" + widget.snap.docs[0]['uid']);
+        .doc(auth.currentUser.uid + ":" + widget.snap['uid']);
 
     followingrefrence = FirebaseFirestore.instance
         .collection('following')
-        .doc(auth.currentUser.uid + ":" + widget.snap.docs[0]['uid']);
-    followers = widget.snap.docs[0]['followers'];
+        .doc(auth.currentUser.uid + ":" + widget.snap['uid']);
+    followers = widget.snap['followers'];
     super.initState();
     init();
     getFollower();
@@ -47,7 +49,7 @@ class _ViewProfileState extends State<ViewProfile> {
   void getFollower() async {
     await FirebaseFirestore.instance
         .collection('profile')
-        .doc(widget.snap.docs[0]['uid'])
+        .doc(widget.snap['uid'])
         .collection('followers')
         .get()
         .then((value) => setState(() {
@@ -56,7 +58,7 @@ class _ViewProfileState extends State<ViewProfile> {
 
     await FirebaseFirestore.instance
         .collection('profile')
-        .doc(widget.snap.docs[0]['uid'])
+        .doc(widget.snap['uid'])
         .collection('following')
         .get()
         .then((value) => setState(() {
@@ -98,7 +100,7 @@ class _ViewProfileState extends State<ViewProfile> {
               collection
                   .doc(auth.currentUser.uid)
                   .collection('following')
-                  .doc(widget.snap.docs[0]['uid'])
+                  .doc(widget.snap['uid'])
                   .delete();
 
               followerefrence.get().then((value) => setState(() {
@@ -125,11 +127,13 @@ class _ViewProfileState extends State<ViewProfile> {
             collection
                 .doc(auth.currentUser.uid)
                 .collection('following')
-                .doc(widget.snap.docs[0]['uid'])
+                .doc(widget.snap['uid'])
                 .set({
-              'name': widget.snap.docs[0]['name'],
-              'image': widget.snap.docs[0]['image'],
-              'uid': widget.snap.docs[0]['uid']
+              'name': widget.isFromNotify == true
+                  ? widget.snap['title']
+                  : widget.snap['name'],
+              'image': widget.snap['image'],
+              'uid': widget.snap['uid']
             });
           });
         }
@@ -151,11 +155,13 @@ class _ViewProfileState extends State<ViewProfile> {
           collection
               .doc(auth.currentUser.uid)
               .collection('following')
-              .doc(widget.snap.docs[0]['uid'])
+              .doc(widget.snap['uid'])
               .set({
-            'name': widget.snap.docs[0]['name'],
-            'image': widget.snap.docs[0]['image'],
-            'uid': widget.snap.docs[0]['uid']
+            'name': widget.isFromNotify == true
+                ? widget.snap['title']
+                : widget.snap['name'],
+            'image': widget.snap['image'],
+            'uid': widget.snap['uid']
           });
         });
       }
@@ -168,17 +174,17 @@ class _ViewProfileState extends State<ViewProfile> {
         if (value.data().keys.contains(auth.currentUser.uid)) {
           FirebaseFirestore.instance.runTransaction((transaction) async {
             DocumentSnapshot followrefs =
-                await transaction.get(collection.doc(widget.snap.docs[0].id));
+                await transaction.get(collection.doc(widget.snap.id));
 
             if (followrefs.exists) {
-              transaction.update(collection.doc(widget.snap.docs[0].id),
+              transaction.update(collection.doc(widget.snap.id),
                   {'followers': followrefs.data()['followers'] - 1});
 
               followerefrence
                   .update({auth.currentUser.uid: FieldValue.delete()});
 
               collection
-                  .doc(widget.snap.docs[0]['uid'])
+                  .doc(widget.snap['uid'])
                   .collection('followers')
                   .doc(auth.currentUser.uid)
                   .delete();
@@ -187,16 +193,16 @@ class _ViewProfileState extends State<ViewProfile> {
         } else {
           FirebaseFirestore.instance.runTransaction((transaction) async {
             DocumentSnapshot followrefs =
-                await transaction.get(collection.doc(widget.snap.docs[0].id));
+                await transaction.get(collection.doc(widget.snap.id));
 
             if (followrefs.exists) {
-              transaction.update(collection.doc(widget.snap.docs[0].id),
+              transaction.update(collection.doc(widget.snap.id),
                   {'followers': followrefs.data()['followers'] + 1});
             }
             followerefrence.set({auth.currentUser.uid: true});
 
             collection
-                .doc(widget.snap.docs[0]['uid'])
+                .doc(widget.snap['uid'])
                 .collection('followers')
                 .doc(auth.currentUser.uid)
                 .set({
@@ -209,16 +215,16 @@ class _ViewProfileState extends State<ViewProfile> {
       } else {
         FirebaseFirestore.instance.runTransaction((transaction) async {
           DocumentSnapshot followrefs =
-              await transaction.get(collection.doc(widget.snap.docs[0].id));
+              await transaction.get(collection.doc(widget.snap.id));
 
           if (followrefs.exists) {
-            transaction.update(collection.doc(widget.snap.docs[0].id),
+            transaction.update(collection.doc(widget.snap.id),
                 {'followers': followrefs.data()['followers'] + 1});
           }
           followerefrence.set({auth.currentUser.uid: true});
 
           collection
-              .doc(widget.snap.docs[0]['uid'])
+              .doc(widget.snap['uid'])
               .collection('followers')
               .doc(auth.currentUser.uid)
               .set({
@@ -232,11 +238,19 @@ class _ViewProfileState extends State<ViewProfile> {
     following();
 
     if (isNotify == false) {
-      sendNotification(widget.snap.docs[0]['uid'], {
+      sendNotification(widget.snap['uid'], {
         'title': auth.currentUser.displayName,
         'sub': "Started following you",
         'image': auth.currentUser.photoURL,
-        'time': FieldValue.serverTimestamp()
+        'bio': profilesnap['bio'],
+        'Location': profilesnap['Location'],
+        'education': profilesnap['education'],
+        'profession': profilesnap['profession'],
+        'followers': profilesnap['followers'],
+        'following': profilesnap['following'],
+        'posts': profilesnap['posts'],
+        'time': FieldValue.serverTimestamp(),
+        'uid': auth.currentUser.uid
       });
 
       setState(() {
@@ -256,7 +270,7 @@ class _ViewProfileState extends State<ViewProfile> {
               child: Column(
                 children: [
                   Text(
-                    "${widget.snap.docs[0]['posts']}",
+                    "${widget.snap['posts']}",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                   Text("Post", style: TextStyle(fontSize: 16)),
@@ -273,7 +287,7 @@ class _ViewProfileState extends State<ViewProfile> {
                         builder: (_) => ViewFollowers(
                             followersnap: followersnap,
                             title: "Followers",
-                            uid: widget.snap.docs[0]['uid'])));
+                            uid: widget.snap['uid'])));
               },
               child: Container(
                 child: Column(
@@ -298,13 +312,13 @@ class _ViewProfileState extends State<ViewProfile> {
                         builder: (_) => ViewFollowers(
                             followersnap: followingsnap,
                             title: "Following",
-                            uid: widget.snap.docs[0]['uid'])));
+                            uid: widget.snap['uid'])));
               },
               child: Container(
                 child: Column(
                   children: [
                     Text(
-                      "${widget.snap.docs[0]['following']}",
+                      "${widget.snap['following']}",
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                     ),
@@ -328,7 +342,9 @@ class _ViewProfileState extends State<ViewProfile> {
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
         title: Text(
-          "${widget.snap.docs[0]['name']}'s Profile",
+          widget.isFromNotify == true
+              ? "${widget.snap['title']}'s Profile"
+              : "${widget.snap['name']}'s Profile",
           style:
               TextStyle(fontSize: 25, color: Color.fromRGBO(101, 97, 125, 1.0)),
         ),
@@ -342,8 +358,10 @@ class _ViewProfileState extends State<ViewProfile> {
                     context,
                     MaterialPageRoute(
                         builder: (_) => ViewProfilePhoto(
-                              title: widget.snap.docs[0]['name'],
-                              url: widget.snap.docs[0]['image'],
+                              title: widget.isFromNotify == true
+                                  ? widget.snap['title']
+                                  : widget.snap['name'],
+                              url: widget.snap['image'],
                             )));
               },
               child: Container(
@@ -358,9 +376,9 @@ class _ViewProfileState extends State<ViewProfile> {
                       backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
                       child: CircleAvatar(
                         radius: 110,
-                        backgroundImage: widget.snap.docs[0]['image'] != ""
+                        backgroundImage: widget.snap['image'] != ""
                             ? NetworkImage(
-                                widget.snap.docs[0]['image'],
+                                widget.snap['image'],
                               )
                             : AssetImage('assets/search.png'),
                       ),
@@ -372,7 +390,10 @@ class _ViewProfileState extends State<ViewProfile> {
             Container(
               width: width,
               alignment: Alignment.center,
-              child: Text(widget.snap.docs[0]['name'],
+              child: Text(
+                  widget.isFromNotify == true
+                      ? widget.snap['title']
+                      : widget.snap['name'],
                   style: TextStyle(
                       fontSize: 35,
                       fontWeight: FontWeight.bold,
@@ -383,9 +404,9 @@ class _ViewProfileState extends State<ViewProfile> {
             ),
             Container(
               child: Text(
-                widget.snap.docs[0]['bio'] == "Add Bio"
+                widget.snap['bio'] == "Add Bio"
                     ? "No bio Added Yet"
-                    : widget.snap.docs[0]['bio'],
+                    : widget.snap['bio'],
                 style: TextStyle(
                   fontSize: 16,
                 ),
@@ -394,7 +415,7 @@ class _ViewProfileState extends State<ViewProfile> {
             Divider(
               thickness: 2,
             ),
-            auth.currentUser.uid != widget.snap.docs[0]['uid']
+            auth.currentUser.uid != widget.snap['uid']
                 ? Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Container(
@@ -444,13 +465,15 @@ class _ViewProfileState extends State<ViewProfile> {
 
                                 String chatRoomId = getChatRoomId(
                                     auth.currentUser.displayName,
-                                    widget.snap.docs[0]['name']);
+                                    widget.isFromNotify == true
+                                        ? widget.snap['title']
+                                        : widget.snap['name']);
 
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) => ChatRoom(
-                                              usersnap: widget.snap.docs[0],
+                                              usersnap: widget.snap,
                                               chatRoomId: chatRoomId,
                                             )));
                               }),
@@ -469,12 +492,13 @@ class _ViewProfileState extends State<ViewProfile> {
                 });
               },
               child: Padding(
-                padding: const EdgeInsets.only(right:8.0, left: 8.0),
+                padding: const EdgeInsets.only(right: 8.0, left: 8.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Color.fromRGBO(101, 97, 125, 1.0),
+                      color: Color.fromRGBO(101, 97, 125, 1.0),
                       borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Color.fromRGBO(0, 245, 206, 1.0), width: 2)),
+                      border: Border.all(
+                          color: Color.fromRGBO(0, 245, 206, 1.0), width: 2)),
                   height: height / 14,
                   width: width / 1.02,
                   child: Row(
@@ -482,9 +506,13 @@ class _ViewProfileState extends State<ViewProfile> {
                       Container(
                         width: width / 1.2,
                         child: Text(
-                          "  View about ${widget.snap.docs[0]['name']}",
+                          widget.isFromNotify == true
+                              ? "  View about ${widget.snap['title']}"
+                              : "  View about ${widget.snap['name']}",
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500, color: Color.fromRGBO(0, 245, 206, 1.0)),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Color.fromRGBO(0, 245, 206, 1.0)),
                         ),
                       ),
                       Icon(
@@ -504,25 +532,26 @@ class _ViewProfileState extends State<ViewProfile> {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(Icons.location_on,),
-                          title: Text(
-                              widget.snap.docs[0]['Location'] == "Add Location"
-                                  ? "No Location Added Yet"
-                                  : widget.snap.docs[0]['Location']),
+                          leading: Icon(
+                            Icons.location_on,
+                          ),
+                          title: Text(widget.snap['Location'] == "Add Location"
+                              ? "No Location Added Yet"
+                              : widget.snap['Location']),
                         ),
                         ListTile(
                           leading: Icon(Icons.edit_attributes),
-                          title: Text(widget.snap.docs[0]['education'] ==
-                                  "Add Education"
-                              ? "No Education Added Yet"
-                              : widget.snap.docs[0]['education']),
+                          title: Text(
+                              widget.snap['education'] == "Add Education"
+                                  ? "No Education Added Yet"
+                                  : widget.snap['education']),
                         ),
                         ListTile(
                           leading: Icon(Icons.work),
-                          title: Text(widget.snap.docs[0]['profession'] ==
-                                  "Add Profession"
-                              ? "No Profession Added Yet"
-                              : widget.snap.docs[0]['profession']),
+                          title: Text(
+                              widget.snap['profession'] == "Add Profession"
+                                  ? "No Profession Added Yet"
+                                  : widget.snap['profession']),
                         ),
                       ],
                     ))
@@ -576,7 +605,7 @@ class _ViewFollowersState extends State<ViewFollowers> {
           context,
           MaterialPageRoute(
               builder: (_) => ViewProfile(
-                    snap: updateprofile,
+                    snap: updateprofile.docs[0],
                   )));
     });
   }
@@ -587,9 +616,8 @@ class _ViewFollowersState extends State<ViewFollowers> {
       appBar: AppBar(
         title: Text(
           widget.title,
-          style: TextStyle(
-            color: Color.fromRGBO(101, 97, 125, 1.0),fontSize: 24
-          ),
+          style:
+              TextStyle(color: Color.fromRGBO(101, 97, 125, 1.0), fontSize: 24),
         ),
         backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
       ),
@@ -622,7 +650,9 @@ class _ViewFollowersState extends State<ViewFollowers> {
                           onTap: () => onTap(context, index, ds),
                           trailing: Text(
                             "View Profile",
-                            style: TextStyle(fontSize: 14, color: Color.fromRGBO(0, 245, 206, 1.0)),
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: Color.fromRGBO(0, 245, 206, 1.0)),
                           ),
                           leading: CircleAvatar(
                             radius: 35,
@@ -630,7 +660,10 @@ class _ViewFollowersState extends State<ViewFollowers> {
                           ),
                           title: Text(
                             ds['name'],
-                            style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 245, 206, 1.0)),
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromRGBO(0, 245, 206, 1.0)),
                           ),
                         ),
                       ),
@@ -652,11 +685,21 @@ class ViewProfilePhoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(title),
       ),
-      body:
-          Center(child: url == null ? Image.asset(asset) : Image.network(url)),
+      body: Center(
+        child: Container(
+            height: MediaQuery.of(context).size.height / 1.5,
+            width: MediaQuery.of(context).size.width,
+            child: url == null
+                ? Image.asset(
+                    asset,
+                    fit: BoxFit.cover,
+                  )
+                : Image.network(url, fit: BoxFit.cover)),
+      ),
     );
   }
 }

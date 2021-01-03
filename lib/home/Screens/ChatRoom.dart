@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:not_whatsapp/home/Screens/ViewProfile.dart';
 import 'package:not_whatsapp/models/Notifications.dart';
 import 'package:not_whatsapp/services/auth.dart';
 
 class ChatRoom extends StatefulWidget {
   final DocumentSnapshot usersnap;
+  final bool isFromNotify;
   final String chatRoomId;
 
-  ChatRoom({this.usersnap, this.chatRoomId});
+  ChatRoom({this.usersnap, this.chatRoomId, this.isFromNotify});
 
   @override
   _ChatRoomState createState() => _ChatRoomState();
@@ -104,44 +106,74 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 220, 230, 1.0),
       appBar: AppBar(
-          backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
-          title: Row(
-            children: [
-              Container(
+        backgroundColor: Color.fromRGBO(0, 245, 206, 1.0),
+        title: Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ViewProfilePhoto(
+                              title: widget.usersnap['name'] == ""
+                                  ? null
+                                  : widget.usersnap['name'],
+                              url: widget.usersnap['image'],
+                              asset: widget.usersnap['image'] == ""
+                                  ? "assets/search.png"
+                                  : null,
+                            )));
+              },
+              child: Container(
                 child: CircleAvatar(
                   radius: 27,
                   backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
                   child: CircleAvatar(
                     radius: 24,
-                    child: Image.network(
-                      widget.usersnap['image'],
-                      fit: BoxFit.fill,
-                    ),
+                    backgroundImage: widget.usersnap['image'] == ""
+                        ? AssetImage('assets/search.png')
+                        : NetworkImage(widget.usersnap['image']),
                   ),
                 ),
               ),
-              // Container(
-              //   height: size.height / 12.9,
-              //   width: size.width / 8,
-              //   child: ClipOval(
-              //     child: Image.network(
-              //       widget.usersnap['image'],
-              //       fit: BoxFit.cover,
-              //     ),
-              //   ),
-              // ),
-              SizedBox(
-                width: size.width / 30,
+            ),
+            SizedBox(
+              width: size.width / 30,
+            ),
+            Text(
+              widget.isFromNotify == true
+                  ? widget.usersnap['title']
+                  : widget.usersnap['name'],
+              style: TextStyle(
+                fontSize: 24,
+                color: Color.fromRGBO(101, 97, 125, 1.0),
               ),
-              Text(
-                widget.usersnap['name'],
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Color.fromRGBO(101, 97, 125, 1.0),
-                ),
-              ),
-            ],
-          )),
+            ),
+          ],
+        ),
+        actions: [
+          PopupMenuButton(
+              onSelected: (value) async {
+                if (value == 1) {
+                  await FirebaseFirestore.instance
+                      .collection('profile')
+                      .doc(widget.usersnap['uid'])
+                      .get()
+                      .then((value) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ViewProfile(
+                                  snap: value,
+                                  isFromNotify: false,
+                                )));
+                  });
+                }
+              },
+              itemBuilder: (context) =>
+                  [PopupMenuItem(value: 1, child: Text("ViewProfile"))])
+        ],
+      ),
       body: StreamBuilder<QuerySnapshot>(
           stream: chatRoom
               .doc(widget.chatRoomId)

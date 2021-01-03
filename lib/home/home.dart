@@ -6,6 +6,7 @@ import 'package:not_whatsapp/home/Screens/profile.dart';
 import 'package:not_whatsapp/services/auth.dart';
 import 'package:not_whatsapp/shared/const.dart';
 import 'package:not_whatsapp/shared/postCard.dart';
+import 'package:not_whatsapp/shared/Dialogs.dart';
 
 import '../shared/const.dart';
 
@@ -84,24 +85,12 @@ class _HomeState extends State<Home> {
                     ))),
             IconButton(
                 icon: Icon(
-                  Icons.menu,
+                  Icons.add_to_home_screen,
                   size: 20,
                   color: Color.fromRGBO(101, 97, 125, 1.0),
                 ),
                 onPressed: () {
-                  BuildContext dialogcontxt;
-
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        dialogcontxt = context;
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      });
-
-                  signout(context, dialogcontxt);
+                  showDialog(context: context, builder: (context) => LogOut());
                 })
           ],
           bottom: TabBar(
@@ -227,8 +216,6 @@ class _MessageState extends State<Message> {
 
   QuerySnapshot snap;
 
-  QuerySnapshot chatsnap;
-
   getUserName() async {
     await FirebaseFirestore.instance
         .collection('profile')
@@ -264,16 +251,16 @@ class _MessageState extends State<Message> {
         .collection('profile')
         .doc(auth.currentUser.uid)
         .collection('chats')
-        .doc(snap.docs[0]['uid'])
+        .doc(ds == null ? snap.docs[0]['uid'] : ds['uid'])
         .set({
-      'name': snap.docs[0]['name'],
-      'image': snap.docs[0]['image'],
-      'uid': snap.docs[0]['uid']
+      'name': ds == null ? snap.docs[0]['name'] : ds['name'],
+      'image': ds == null ? snap.docs[0]['image'] : ds['image'],
+      'uid': ds == null ? snap.docs[0]['uid'] : ds['uid']
     });
 
     FirebaseFirestore.instance
         .collection('profile')
-        .doc(snap.docs[0]['uid'])
+        .doc(ds == null ? snap.docs[0]['uid'] : ds['uid'])
         .collection('chats')
         .doc(auth.currentUser.uid)
         .set({
@@ -288,6 +275,7 @@ class _MessageState extends State<Message> {
             builder: (_) => ChatRoom(
                   usersnap: ds == null ? snap.docs[0] : ds,
                   chatRoomId: chatRoomId,
+                  isFromNotify: false,
                 )));
   }
 
@@ -307,10 +295,12 @@ class _MessageState extends State<Message> {
               return Card(
                 child: ListTile(
                   focusColor: Color.fromRGBO(0, 245, 206, 1.0),
-                  title: Text(snap.docs[index]['name']),
+                  title: Text(snap.docs[0]['name']),
                   leading: CircleAvatar(
                     radius: 25,
-                    backgroundImage: NetworkImage(snap.docs[index]['image']),
+                    backgroundImage: snap.docs[0]['image'] == ""
+                        ? AssetImage('assets/search.png')
+                        : NetworkImage(snap.docs[0]['image']),
                   ),
                   trailing: RaisedButton(
                       textColor: Color.fromRGBO(0, 245, 206, 1.0),
@@ -409,19 +399,26 @@ class _MessageState extends State<Message> {
                             itemBuilder: (context, index) {
                               return GestureDetector(
                                 onTap: () {
-                                    print(snapshot.data.docs[index]['name']);
-                                    createChatRoom(snapshot.data.docs[index]);
-                                  },
+                                  print(snapshot.data.docs[index]['name']);
+                                  createChatRoom(snapshot.data.docs[index]);
+                                },
                                 child: Card(
                                   child: ListTile(
                                     leading: CircleAvatar(
                                       radius: 25,
-                                      backgroundImage: NetworkImage(
-                                          snapshot.data.docs[index]['image']),
+                                      backgroundImage: snapshot.data.docs[index]
+                                                  ['image'] ==
+                                              ""
+                                          ? AssetImage('assets/search.png')
+                                          : NetworkImage(snapshot
+                                              .data.docs[index]['image']),
                                     ),
                                     title:
                                         Text(snapshot.data.docs[index]['name']),
-                                        trailing: Icon(Icons.message, color:Color.fromRGBO(101, 97, 125, 1.0),),
+                                    trailing: Icon(
+                                      Icons.message,
+                                      color: Color.fromRGBO(101, 97, 125, 1.0),
+                                    ),
                                   ),
                                 ),
                               );
@@ -443,6 +440,49 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
+  void onTap(DocumentSnapshot ds) {
+    if (ds['sub'] == "has send you a message") {
+      String chatRoomId =
+          getChatRoomId(auth.currentUser.displayName, ds['title']);
+
+      List<String> users = [auth.currentUser.displayName, ds['title']];
+
+      Map<String, dynamic> chats = {'users': users, 'chatroomid': chatRoomId};
+
+      FirebaseFirestore.instance
+          .collection('Chatroom')
+          .doc(chatRoomId)
+          .set(chats)
+          .catchError((e) {
+        print(e);
+      });
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ChatRoom(
+                    usersnap: ds,
+                    chatRoomId: chatRoomId,
+                    isFromNotify: true,
+                  )));
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) => AlertMessage(
+                title: "Not Avalible",
+                content: "This Feature Is Not Avalible Yet",
+              ));
+    }
+  }
+
+  String getChatRoomId(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -461,6 +501,7 @@ class _NotificationsState extends State<Notifications> {
                   DocumentSnapshot ds = snapshot.data.docs[index];
                   return Card(
                     child: ListTile(
+                      onTap: () => onTap(ds),
                       leading: CircleAvatar(
                         backgroundImage: NetworkImage(ds['image']),
                       ),

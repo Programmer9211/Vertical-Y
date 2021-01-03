@@ -101,14 +101,6 @@ class _SignUpState extends State<SignUp> {
                   ],
                 ),
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.only(left: 25.0, right: 25.0, top: 10),
-                child: TextFormField(
-                    decoration: textfieldDecor.copyWith(
-                  labelText: "Something About you",
-                )),
-              ),
               SizedBox(height: 30),
               MaterialButton(
                 height: 50,

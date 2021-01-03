@@ -103,6 +103,7 @@ class _CreatePostState extends State<CreatePost> {
                         'uid': auth.currentUser.uid,
                         'likes': 0,
                         'dislikes': 0,
+                        'bio': profilesnap['bio'],
                         'image': auth.currentUser.photoURL == null
                             ? ""
                             : auth.currentUser.photoURL

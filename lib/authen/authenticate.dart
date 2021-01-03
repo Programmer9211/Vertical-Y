@@ -13,7 +13,12 @@ class Authenticate extends StatefulWidget {
 class _AuthenticateState extends State<Authenticate> {
   final _formKey = GlobalKey<FormState>();
   final _scaffoldkey = GlobalKey<ScaffoldState>();
-  BuildContext dialogcontxt;
+
+  @override
+  void initState() {
+    super.initState();
+    checks(context);
+  }
 
   String email1 = "";
   String password1 = "";
@@ -111,14 +116,17 @@ class _AuthenticateState extends State<Authenticate> {
                           context: context,
                           barrierDismissible: false,
                           builder: (context) {
-                            dialogcontxt = context;
                             return Center(
                               child: CircularProgressIndicator(),
                             );
                           });
 
-                      signIn(email1, password1, context, _scaffoldkey,
-                          dialogcontxt);
+                      signIn(
+                        email1,
+                        password1,
+                        context,
+                        _scaffoldkey,
+                      );
                     }
                   },
                   color: Color.fromRGBO(0, 245, 206, 1.0),

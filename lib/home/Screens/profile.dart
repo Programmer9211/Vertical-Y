@@ -82,6 +82,47 @@ class _ProfileState extends State<Profile> {
     });
   }
 
+  void onSelected() {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              backgroundColor: Color.fromRGBO(101, 97, 125, 1.0),
+              title: Container(
+                height: MediaQuery.of(context).size.height / 10,
+                width: MediaQuery.of(context).size.width / 1.8,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: FlatButton(
+                          textColor: Color.fromRGBO(0, 245, 206, 1.0),
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ViewProfilePhoto(
+                                        title: auth.currentUser.displayName,
+                                        url: auth.currentUser.photoURL == null
+                                            ? null
+                                            : auth.currentUser.photoURL,
+                                        asset: auth.currentUser.photoURL == null
+                                            ? "assets/search.png"
+                                            : null,
+                                      ))),
+                          child: Text('View Profile')),
+                    ),
+                    Expanded(
+                      child: FlatButton(
+                          textColor: Color.fromRGBO(0, 245, 206, 1.0),
+                          onPressed: () => chooseImage(),
+                          child: Text("Change Profile")),
+                    ),
+                  ],
+                ),
+              ),
+            ));
+  }
+
   final controller = TextEditingController();
 
   void onTapped(String collection) {
@@ -226,16 +267,20 @@ class _ProfileState extends State<Profile> {
                                             Color.fromRGBO(0, 245, 206, 1.0),
                                         child: CircleAvatar(
                                           radius: 75,
-                                          backgroundImage:
-                                              snapshot.data['image'] == ""
-                                                  ? AssetImage("assets/1.jpg")
-                                                  : NetworkImage(
-                                                      snapshot.data['image']),
+                                          backgroundImage: snapshot
+                                                      .data['image'] ==
+                                                  ""
+                                              ? AssetImage("assets/search.png")
+                                              : NetworkImage(
+                                                  snapshot.data['image']),
                                           child: IconButton(
-                                            icon: Icon(Icons.photo, size: 30, color: Colors.grey.withOpacity(0.2),),
-                                            onPressed: () {
-                                              chooseImage();
-                                            },
+                                            icon: Icon(
+                                              Icons.photo,
+                                              size: 30,
+                                              color:
+                                                  Colors.grey.withOpacity(0.2),
+                                            ),
+                                            onPressed: onSelected,
                                           ),
                                         ),
                                       ),
